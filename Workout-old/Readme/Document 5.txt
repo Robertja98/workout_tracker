@@ -1,0 +1,53 @@
+Document 5: CSV Database Design
+
+Purpose
+Define the CSV schema and implement modular helper functions for:
+
+Adding new workouts.
+Reading all workouts.
+Updating existing entries.
+Ensuring column names match SQL schema for easy migration.
+
+
+CSV Schema
+date,exercise,reps,weight
+
+
+date: YYYY-MM-DD
+exercise: String (e.g., "Squat")
+reps: Integer
+weight: Float (kg)
+
+
+Design Principles
+
+All operations go through helper functions.
+Functions should be stateless and accept file path as a parameter.
+Keep column names consistent with future SQL schema.
+
+
+Ready-to-Use Python Module: csv_utils.py
+Pythonimport csvimport osdef init_csv(csv_file):    """Initialize CSV file with header if not exists."""    if not os.path.exists(csv_file):        with open(csv_file, 'w', newline='') as f:            writer = csv.writer(f)            writer.writerow(['date', 'exercise', 'reps', 'weight'])def add_workout(csv_file, data):    """Append a new workout entry to CSV."""    with open(csv_file, 'a', newline='') as f:        writer = csv.writer(f)        writer.writerow(data)def read_workouts(csv_file):    """Read all workouts from CSV."""    with open(csv_file, 'r') as f:        reader = csv.DictReader(f)        return list(reader)def update_workout(csv_file, row_index, new_data):    """Update a specific workout entry by row index."""    rows = []    with open(csv_file, 'r') as f:        reader = csv.reader(f)        rows = list(reader)    if row_index < 1 or row_index >= len(rows):        raise IndexError("Invalid row index")    rows[row_index] = new_data    with open(csv_file, 'w', newline='') as f:        writer = csv.writer(f)        writer.writerows(rows)def delete_workout(csv_file, row_index):    """Delete a specific workout entry by row index."""    rows = []    with open(csv_file, 'r') as f:        reader = csv.reader(f)        rows = list(reader)    if row_index < 1 or row_index >= len(rows):        raise IndexError("Invalid row index")    del rows[row_index]    with open(csv_file, 'w', newline='') as f:        writer = csv.writer(f)        writer.writerows(rows)Show more lines
+
+Usage Example
+PythonCSV_FILE = 'data/workouts.csv'init_csv(CSV_FILE)# Add a workoutadd_workout(CSV_FILE, ['2026-01-18', 'Squat', 10, 80])# Read workoutsworkouts = read_workouts(CSV_FILE)print(workouts)# Update second workoutupdate_workout(CSV_FILE, 2, ['2026-01-18', 'Bench Press', 8, 60])# Delete third workoutdelete_workout(CSV_FILE, 3)Show more lines
+
+Migration Diagram (Text-Based)
+CSV (date, exercise, reps, weight)
+        |
+        v
+SQLite/PostgreSQL (same columns)
+        |
+        v
+Helper functions switch from CSV to SQL
+
+
+✅ Document 5 is complete!
+Next, I’ll prepare Document 6: Deployment & Testing, which will include:
+
+Local testing steps.
+JSON → CSV validation.
+Debugging common issues.
+Checklist for responsive UI and sensor integration.
+Deployment options (local, Docker).
+

@@ -1,0 +1,69 @@
+Document 3: Tablet UI
+
+Purpose
+Create a tablet-friendly interface for logging workouts and viewing progress:
+
+Responsive design using Bootstrap.
+Large buttons for quick input.
+Minimal typing during workouts.
+AJAX calls to Flask API using JSON.
+
+
+UI Features
+
+Workout Form:
+
+Date picker.
+Dropdown for exercise selection.
+Numeric input for reps and weight.
+Large “Add Workout” button.
+
+
+Dashboard:
+
+Table of logged workouts.
+Charts for progress visualization (future integration with Chart.js).
+
+
+
+
+Responsive Design Principles
+
+Use Bootstrap grid system for layout.
+Apply large button classes (btn-lg) for touch-friendly UI.
+Ensure font scaling for readability on tablets.
+
+
+Full HTML Template (workout.html)
+HTML<!DOCTYPE html><html><head>    <title>Workout Tracker</title>    <meta name="viewport" content="width=device-width, initial-scale=1">    https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css</head><body class="container mt-4">    <h1 class="text-center mb-4">Workout Tracker</h1>    <!-- Workout Form -->    <div class="card p-4 mb-4">        <h3>Add Workout</h3>        <form id="workoutForm">            <div class="mb-3">                <label>Date:</label>                <input type="date" class="form-control" id="date" required>            </div>            <div class="mb-3">                <label>Exercise:</label>                <select class="form-control" id="exercise">                    <option>Squat</option>                    <option>Bench Press</option>                    <option>Deadlift</option>                </select>            </div>            <div class="mb-3">                <label>Reps:</label>                <input type="number" class="form-control" id="reps" required>            </div>            <div class="mb-3">                <label>Weight (kg):</label>                <input type="number" class="form-control" id="weight" required>            </div>            <button type="submit" class="btn btn-primary btn-lg w-100">Add Workout</button>        </form>    </div>    <!-- Dashboard -->    <div>        <h3>Workout Dashboard</h3>        <table class="table table-striped mt-3" id="workoutTable">            <thead>                <tr><th>Date</th><th>Exercise</th><th>Reps</th><th>Weight</th></tr>            </thead>            <tbody></tbody>        </table>    </div>    <script>        document.getElementById('workoutForm').addEventListener('submit', function(e) {            e.preventDefault();            const data = {                date: document.getElementById('date').value,                exercise: document.getElementById('exercise').value,                reps: document.getElementById('reps').value,                weight: document.getElementById('weight').value            };            fetch('/add', {                method: 'POST',                headers: {'Content-Type': 'application/json'},                body: JSON.stringify(data)            })            .then(response => response.json())            .then(result => {                alert(result.message);                loadWorkouts();            });        });        function loadWorkouts() {            fetch('/dashboard')            .then(response => response.text())            .then(html => {                document.querySelector('tbody').innerHTML = html.match(/<tbody>([\s\S]*?)<\/tbody>/)[1];            });        }        loadWorkouts();    </script></body></html>Show more lines
+
+UI Interaction Flow Diagram (Text-Based)
+[User taps button] --> [AJAX sends JSON to /add] --> [Flask writes to CSV]
+       |
+       v
+[Dashboard reloads] --> [Flask reads CSV] --> [UI updates table]
+
+
+✅ Document 3 is complete!
+Next, I’ll prepare Document 4: Sensor Integration, which will include:
+
+RFID → Python script → JSON → Flask.
+ESP32 + MPU6050 → Wi-Fi/LoRa → Flask.
+Camera (MediaPipe/OpenCV) → JSON.
+Smartwatch → REST API integration.
+Sensor → API → CSV pipeline diagram.
+Sample code snippets for each sensor type.
+
+
+👉 Do you want Document 4 to include actual Python code for RFID and Camera integration, and Arduino code for ESP32 sensors?
+✔ Yes, include full code examples
+✔ No, just conceptual snippets
+Which do you prefer?
+Provide your feedback on BizChatYou said: yesCopilot said: Copilot✅ Awesome! Document 4 will include full code examples for:
+
+RFID integration (Python)
+ESP32 + MPU6050 (Arduino/C++)
+Camera-based rep counting (Python with MediaPipe/OpenCV)
+Smartwatch REST API integration (Python)
+
+Plus, a sensor → API → CSV pipeline diagram and modular design notes.

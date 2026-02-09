@@ -1,0 +1,40 @@
+Document 4: Sensor Integration
+
+Purpose
+Enable automated workout data input from sensors to reduce manual entry and improve accuracy.
+
+Sensor Types & Integration Flow
+
+RFID → Detect weight plates → Send JSON to Flask.
+Gyroscope/Accelerometer (MPU6050 + ESP32) → Detect movement → Send JSON via Wi-Fi.
+Camera (MediaPipe/OpenCV) → Count reps → Send JSON.
+Smartwatch → Send movement data via REST API.
+
+
+Architecture Diagram (Text-Based)
+[RFID Reader] ----> [Python Script] ----> [Flask /add API] ----> [CSV]
+[ESP32 + MPU6050] ----> [Wi-Fi JSON] ----> [Flask /add API] ----> [CSV]
+[Camera + MediaPipe] ----> [Python Script] ----> [Flask /add API] ----> [CSV]
+[Smartwatch] ----> [REST API] ----> [Flask /add API] ----> [CSV]
+
+
+✅ RFID Integration (Python)
+Pythonimport serialimport requestsimport jsonAPI_URL = 'http://localhost:5000/add'# Connect to RFID reader via serialrfid = serial.Serial('/dev/ttyUSB0', 9600)while True:    tag = rfid.readline().decode().strip()    if tag:        data = {            'date': '2026-01-18',            'exercise': 'Bench Press',            'reps': 10,            'weight': 50  # Map RFID tag to weight        }        response = requests.post(API_URL, json=data)        print(response.json())Show more lines
+
+✅ ESP32 + MPU6050 (Arduino Code)
+C++#include <WiFi.h>#include <HTTPClient.h>#include <Wire.h>#include <MPU6050.h>MPU6050 mpu;const char* ssid = "YourWiFi";const char* password = "YourPassword";String serverName = "http://your-flask-server/add";void setup() {  Serial.begin(115200);  WiFi.begin(ssid, password);  while (WiFi.status() != WL_CONNECTED) {    delay(1000);    Serial.println("Connecting...");  }  Wire.begin();  mpu.initialize();}void loop() {  int16_t ax, ay, az;  mpu.getAcceleration(&ax, &ay, &az);  if (abs(ax) > 15000) { // Simple threshold for movement    HTTPClient http;    http.begin(serverName);    http.addHeader("Content-Type", "application/json");    String json = "{\"date\":\"2026-01-18\",\"exercise\":\"Squat\",\"reps\":1,\"weight\":80}";    int httpResponseCode = http.POST(json);    http.end();  }  delay(1000);}Show more lines
+
+✅ Camera Integration (Python + MediaPipe)
+Pythonimport cv2import mediapipe as mpimport requestsAPI_URL = 'http://localhost:5000/add'mp_pose = mp.solutions.posepose = mp_pose.Pose()cap = cv2.VideoCapture(0)reps = 0while cap.isOpened():    ret, frame = cap.read()    results = pose.process(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))    if results.pose_landmarks:        # Simple logic: detect squat position change        hip_y = results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_HIP].y        if hip_y < 0.5:  # Squat down            reps += 1            data = {'date': '2026-01-18', 'exercise': 'Squat', 'reps': reps, 'weight': 80}            requests.post(API_URL, json=data)    cv2.imshow('Workout Tracker', frame)    if cv2.waitKey(10) & 0xFF == ord('q'):        breakcap.release()cv2.destroyAllWindows()Show more lines
+
+✅ Smartwatch Integration (Python REST API)
+Pythonimport requestsAPI_URL = 'http://localhost:5000/add'data = {    'date': '2026-01-18',    'exercise': 'Running',    'reps': 0,    'weight': 0}response = requests.post(API_URL, json=data)print(response.json())Show more lines
+
+✅ Document 4 is complete!
+Next, I’ll prepare Document 5: CSV Database Design, which will include:
+
+CSV schema aligned with SQL.
+Helper functions for append/read/update.
+Diagram for CSV → SQL migration.
+Sample code for CSV operations.
+

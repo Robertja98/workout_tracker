@@ -1,0 +1,129 @@
+✅ Great! Document 2 will include a **ready-to-run Flask starter code** along with explanations, diagrams, and modular design principles.
+
+***
+
+# **Document 2: Core Flask App**
+
+***
+
+## **Purpose**
+
+This document provides the **Flask backend implementation** for the workout tracking system, including:
+
+*   Project structure.
+*   API routes (`/add`, `/dashboard`).
+*   JSON parsing and CSV handling.
+*   Modular helper functions for future DB migration.
+*   Ready-to-run starter code.
+
+***
+
+## **Flask Project Structure**
+
+    workout_tracker/
+    │
+    ├── app.py                # Main Flask app
+    ├── static/               # CSS, JS files
+    ├── templates/            # HTML templates
+    ├── data/
+    │    └── workouts.csv     # Initial CSV storage
+    └── utils.py              # Helper functions
+
+***
+
+## **Core Routes**
+
+*   **`/add`**: Accepts JSON payload from UI or sensors, writes to CSV.
+*   **`/dashboard`**: Reads CSV and displays progress in a web page.
+
+***
+
+## **Starter Code: app.py**
+
+```python
+from flask import Flask, request, jsonify, render_template
+import csv
+import os
+from utils import add_workout, read_workouts
+
+app = Flask(__name__)
+CSV_FILE = 'data/workouts.csv'
+
+# Ensure CSV file exists
+if not os.path.exists(CSV_FILE):
+    with open(CSV_FILE, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(['date', 'exercise', 'reps', 'weight'])
+
+@app.route('/')
+def home():
+    return render_template('dashboard.html', workouts=read_workouts(CSV_FILE))
+
+@app.route('/add', methods=['POST'])
+def add():
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'Invalid JSON'}), 400
+    add_workout(CSV_FILE, [data['date'], data['exercise'], data['reps'], data['weight']])
+    return jsonify({'status': 'success', 'message': 'Workout added'})
+
+@app.route('/dashboard')
+def dashboard():
+    workouts = read_workouts(CSV_FILE)
+    return render_template('dashboard.html', workouts=workouts)
+
+if __name__ == '__main__':
+    app.run(debug=True)
+```
+
+***
+
+## **Helper Functions: utils.py**
+
+```python
+import csv
+
+def add_workout(csv_file, data):
+    with open(csv_file, 'a', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(data)
+
+def read_workouts(csv_file):
+    with open(csv_file, 'r') as f:
+        reader = csv.reader(f)
+        return list(reader)[1:]  # Skip header
+```
+
+***
+
+## **Sample HTML Template: dashboard.html**
+
+
+
+***
+
+## **API Flow Diagram (Text-Based)**
+
+    UI (Tablet) ----> Flask (/add) ----> CSV Storage
+           |                |
+           |                v
+           |          Flask (/dashboard) ----> UI (Charts)
+    Sensors ----> Flask (/add) ----> CSV
+
+***
+
+✅ **Document 2 is complete!**\
+Next, I’ll prepare **Document 3: Tablet UI** with:
+
+*   Responsive design using Bootstrap.
+*   HTML mockups for large buttons.
+*   AJAX calls with JSON payloads.
+*   UI interaction flow diagram.
+
+***
+
+👉 Do you want **Document 3 to include a fully functional HTML + JS template for the workout form and dashboard**?\
+✔ Yes, include full template\
+✔ No, just snippets
+
+Which do you prefer?

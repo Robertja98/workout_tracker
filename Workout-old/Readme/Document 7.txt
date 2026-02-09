@@ -1,0 +1,99 @@
+✅ Updated Document 7 Plan:
+
+
+Schema Design for ZIM
+
+Match columns: date, exercise, reps, weight.
+Discuss indexing for fast queries.
+
+
+
+Migration Strategy
+
+Read CSV → Insert into ZIM.
+Validate data integrity.
+
+
+
+Python Integration
+
+Use ZIM Python bindings (or REST API if available).
+Implement helper functions:
+
+add_workout_zim()
+read_workouts_zim()
+update_workout_zim()
+delete_workout_zim()
+
+
+
+
+
+Diagram
+CSV ---> ZIM Database ---> Flask API (unchanged)
+
+
+
+Sample Code
+
+Full CRUD examples using ZIM.
+
+
+
+
+✅ I’ll now prepare Document 7: Database Migration (ZIM Edition) with full Python code and diagrams.
+
+👉 Quick confirmation:
+Do you want me to include both migration script (CSV → ZIM) AND updated Flask helper functions for ZIM?
+✔ Yes, include both
+✔ No, just migration script
+Which do you prefer?
+Provide your feedback on BizChatYou said: yesCopilot said: Copilot✅ Perfect! Here’s Document 7: Database Migration (ZIM Edition) with full migration script AND updated Flask helper functions for ZIM.
+
+Document 7: Database Migration (ZIM Edition)
+
+Purpose
+Replace CSV storage with ZIM Database while keeping:
+
+Flask routes unchanged (/add, /dashboard).
+JSON API consistent for UI and sensors.
+Modular helper functions for easy maintenance.
+
+
+Schema Design for ZIM
+Match CSV columns for smooth migration:
+date (TEXT)
+exercise (TEXT)
+reps (INTEGER)
+weight (REAL)
+
+Add indexes for faster queries:
+
+Index on date for time-based queries.
+Index on exercise for filtering by workout type.
+
+
+Migration Strategy
+
+Read all rows from workouts.csv.
+Insert each row into ZIM database.
+Validate row count and data integrity.
+Keep old CSV as backup.
+
+
+Migration Script: CSV → ZIM
+Pythonimport csvimport zimdb  # Hypothetical ZIM Python libraryCSV_FILE = 'data/workouts.csv'ZIM_DB = 'data/workouts.zim'# Connect to ZIM databasedb = zimdb.connect(ZIM_DB)# Create table if not existsdb.execute("""CREATE TABLE IF NOT EXISTS workouts (    id INTEGER PRIMARY KEY AUTOINCREMENT,    date TEXT,    exercise TEXT,    reps INTEGER,    weight REAL);""")# Read CSV and insert into ZIMwith open(CSV_FILE, 'r') as f:    reader = csv.DictReader(f)    for row in reader:        db.execute("""        INSERT INTO workouts (date, exercise, reps, weight)        VALUES (?, ?, ?, ?)        """, (row['date'], row['exercise'], int(row['reps']), float(row['weight'])))print("Migration complete!")Show more lines
+
+Updated Helper Functions for ZIM
+Pythonimport zimdbZIM_DB = 'data/workouts.zim'db = zimdb.connect(ZIM_DB)def add_workout_zim(data):    db.execute("""    INSERT INTO workouts (date, exercise, reps, weight)    VALUES (?, ?, ?, ?)    """, (data['date'], data['exercise'], int(data['reps']), float(data['weight'])))def read_workouts_zim():    return db.query("SELECT date, exercise, reps, weight FROM workouts")def update_workout_zim(workout_id, new_data):    db.execute("""    UPDATE workouts SET date=?, exercise=?, reps=?, weight=? WHERE id=?    """, (new_data['date'], new_data['exercise'], int(new_data['reps']), float(new_data['weight']), workout_id))def delete_workout_zim(workout_id):    db.execute("DELETE FROM workouts WHERE id=?", (workout_id,))Show more lines
+
+Flask Integration
+Replace CSV helper calls with ZIM helpers in app.py:
+Python@app.route('/add', methods=['POST'])def add():    data = request.get_json()    add_workout_zim(data)    return jsonify({'status': 'success', 'message': 'Workout added to ZIM DB'})@app.route('/dashboard')def dashboard():    workouts = read_workouts_zim()    return render_template('dashboard.html', workouts=workouts)Show more lines
+
+Diagram: Migration Flow
+CSV ---> ZIM Database ---> Flask API (unchanged) ---> UI & Sensors
+
+
+✅ Document 7 is complete!
+🎉 You now have all seven documents, each with full code, diagrams, and deployment instructions.

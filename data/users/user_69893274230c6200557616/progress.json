@@ -1,0 +1,93 @@
+[
+    {
+        "sessionId": "sess_1770603414396_dwgj",
+        "routineId": "4",
+        "routineName": "Cardio + Flexibility",
+        "exercise": "High Knees",
+        "set": 1,
+        "weight": 0,
+        "reps": 60,
+        "effort": null,
+        "startTime": "2026-02-09T02:17:05.679Z",
+        "endTime": "2026-02-09T02:17:09.695Z",
+        "duration": 4
+    },
+    {
+        "sessionId": "sess_1770603414396_dwgj",
+        "routineId": "4",
+        "routineName": "Cardio + Flexibility",
+        "exercise": "High Knees",
+        "set": 2,
+        "weight": 0,
+        "reps": 60,
+        "effort": null,
+        "startTime": "2026-02-09T02:17:10.545Z",
+        "endTime": "2026-02-09T02:17:10.990Z",
+        "duration": 0
+    },
+    {
+        "sessionId": "sess_1770603414396_dwgj",
+        "routineId": "4",
+        "routineName": "Cardio + Flexibility",
+        "exercise": "High Knees",
+        "set": 3,
+        "weight": 0,
+        "reps": 60,
+        "effort": null,
+        "startTime": "2026-02-09T02:17:11.634Z",
+        "endTime": "2026-02-09T02:17:11.886Z",
+        "duration": 0
+    },
+    {
+        "sessionId": "sess_1770603414396_dwgj",
+        "routineId": "4",
+        "routineName": "Cardio + Flexibility",
+        "exercise": "Burpees",
+        "set": 3,
+        "weight": 0,
+        "reps": 15,
+        "effort": null,
+        "startTime": "2026-02-09T02:17:13.045Z",
+        "endTime": "2026-02-09T02:17:13.661Z",
+        "duration": 1
+    },
+    {
+        "sessionId": "sess_1770603628231_w87i",
+        "routineId": "1",
+        "routineName": "Full Body Routine",
+        "exercise": "Squats",
+        "set": 1,
+        "weight": 0,
+        "reps": 12,
+        "effort": null,
+        "startTime": "2026-02-09T02:20:41.075Z",
+        "endTime": "2026-02-09T02:20:41.941Z",
+        "duration": 1
+    },
+    {
+        "sessionId": "sess_1770603628231_w87i",
+        "routineId": "1",
+        "routineName": "Full Body Routine",
+        "exercise": "Squats",
+        "set": 2,
+        "weight": 0,
+        "reps": 12,
+        "effort": null,
+        "startTime": "2026-02-09T02:20:42.553Z",
+        "endTime": "2026-02-09T02:20:43.035Z",
+        "duration": 0
+    },
+    {
+        "sessionId": "sess_1770603628231_w87i",
+        "routineId": "1",
+        "routineName": "Full Body Routine",
+        "exercise": "Squats",
+        "set": 3,
+        "weight": 0,
+        "reps": 12,
+        "effort": null,
+        "startTime": "2026-02-09T02:20:43.658Z",
+        "endTime": "2026-02-09T02:20:44.100Z",
+        "duration": 0
+    }
+]

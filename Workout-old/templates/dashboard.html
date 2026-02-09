@@ -1,0 +1,322 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Workout Dashboard</title>
+</head>
+<body>
+<nav>
+    <a href="/">Home</a> |
+    <a href="/add">Add Workout</a> |
+    <a href="/dashboard">Dashboard</a>
+</nav>
+
+<div class="body-dashboard dashboard">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>Controls</h2>
+        <button id="generate-routine-btn" style="margin-bottom: 10px;">Generate Routine</button>
+        <button id="save-routine-btn" style="margin-bottom: 10px;">Save Routine</button>
+        <button id="load-routine-btn" style="margin-bottom: 10px;">Load Last Routine</button>
+
+        <!-- Dropdown for saved routines -->
+        <label for="routine-select"><strong>Select Saved Routine:</strong></label>
+        <select id="routine-select" style="margin-bottom: 20px; width: 100%;">
+            <option value="">-- Choose a routine --</option>
+        </select>
+        <button id="load-selected-routine-btn" style="margin-bottom: 20px;">Load Selected Routine</button>
+
+        <!-- Workout Settings -->
+        <h3 style="margin-top:20px;">Workout Settings</h3>
+        <label for="reps-input">Reps per Set:</label>
+        <input type="number" id="reps-input" value="10" min="1">
+
+        <label for="sets-input">Total Sets:</label>
+        <input type="number" id="sets-input" value="3" min="1">
+    </div>
+
+    <!-- Main Content -->
+    <div class="main current-column">
+        <h2 id="exercise-title">Current Exercise: None</h2>
+        <div id="config-text" style="margin-bottom: 10px; font-weight: bold;"></div>
+        <div id="selected-weight" style="margin-bottom: 15px; font-weight: bold;"></div>
+        <button class="complete-btn">Complete Rep</button>
+        <div class="weights">
+            <button>80</button>
+            <button>90</button>
+            <button>100</button>
+            <button>110</button>
+            <button>120</button>
+        </div>
+        <div class="progress-bar-container">
+            <div class="progress-bar"></div>
+        </div>
+        <div class="progress">Sets Completed: 0 / 3 | Current Reps: 0</div>
+        <button class="next-btn">Next Exercise</button>
+        <button id="complete-workout-btn" style="margin-top:15px;">Complete Workout</button>
+
+        <!-- New Routine Panel -->
+        <div id="routine-main-panel" style="margin-top: 30px;">
+            <h3>Routine Exercises</h3>
+            <div id="exercise-buttons" style="display: flex; flex-wrap: wrap; gap: 10px;">
+                <p>No routine loaded yet.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let reps = 0;
+let setsCompleted = 0;
+let selectedWeight = '';
+let repsPerSet = parseInt(document.getElementById('reps-input').value) || 10;
+let totalSets = parseInt(document.getElementById('sets-input').value) || 3;
+
+const repsInput = document.getElementById('reps-input');
+const setsInput = document.getElementById('sets-input');
+const configText = document.getElementById('config-text');
+const completeBtn = document.querySelector('.complete-btn');
+const progressDiv = document.querySelector('.progress');
+const progressBar = document.querySelector('.progress-bar');
+const weightButtons = document.querySelectorAll('.weights button');
+const nextBtn = document.querySelector('.next-btn');
+const exerciseTitle = document.getElementById('exercise-title');
+const selectedWeightDiv = document.getElementById('selected-weight');
+const generateRoutineBtn = document.getElementById('generate-routine-btn');
+const saveRoutineBtn = document.getElementById('save-routine-btn');
+const loadRoutineBtn = document.getElementById('load-routine-btn');
+const routineSelect = document.getElementById('routine-select');
+const loadSelectedRoutineBtn = document.getElementById('load-selected-routine-btn');
+
+// ✅ Update config display
+function updateConfig() {
+    configText.textContent = `Reps per Set: ${repsPerSet || 0} | Total Sets: ${totalSets || 0}`;
+}
+
+// ✅ Update progress bar and text dynamically
+function updateProgress() {
+    const totalReps = totalSets * repsPerSet;
+    const completedReps = setsCompleted * repsPerSet + reps;
+    const progressPercent = Math.min((completedReps / totalReps) * 100, 100);
+    progressBar.style.width = `${progressPercent}%`;
+    progressDiv.textContent = `Sets Completed: ${setsCompleted} / ${totalSets} | Current Reps: ${reps}`;
+}
+
+// ✅ Reset progress when switching exercise or next button
+function resetProgress() {
+    reps = 0;
+    setsCompleted = 0;
+    progressBar.style.width = '0%';
+    progressDiv.textContent = `Sets Completed: ${setsCompleted} / ${totalSets} | Current Reps: ${reps}`;
+}
+
+// ✅ Save state to Local Storage
+function saveToLocalStorage() {
+    const workoutData = {
+        repsPerSet,
+        totalSets,
+        reps,
+        setsCompleted,
+        currentExercise: exerciseTitle.textContent.replace('Current Exercise: ', ''),
+        selectedWeight
+    };
+    localStorage.setItem('workoutData', JSON.stringify(workoutData));
+}
+
+// ✅ Load state from Local Storage
+function loadFromLocalStorage() {
+    const savedData = JSON.parse(localStorage.getItem('workoutData'));
+    if (savedData) {
+        repsPerSet = parseInt(savedData.repsPerSet) || repsPerSet;
+        totalSets = parseInt(savedData.totalSets) || totalSets;
+        reps = parseInt(savedData.reps) || 0;
+        setsCompleted = parseInt(savedData.setsCompleted) || 0;
+        exerciseTitle.textContent = `Current Exercise: ${savedData.currentExercise}`;
+        selectedWeight = savedData.selectedWeight || '';
+        selectedWeightDiv.textContent = selectedWeight ? `Selected Weight: ${selectedWeight} lbs` : '';
+        updateConfig();
+        updateProgress();
+    }
+}
+
+// ✅ Handle Complete Rep button
+completeBtn.addEventListener('click', () => {
+    reps++;
+    if (reps >= repsPerSet) {
+        reps = 0;
+        setsCompleted++;
+        if (setsCompleted >= totalSets) {
+            alert('Exercise complete! Move to next.');
+            setsCompleted = totalSets;
+        }
+    }
+    updateProgress();
+    saveToLocalStorage();
+});
+
+// ✅ Handle weight selection
+weightButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        selectedWeight = button.textContent;
+        selectedWeightDiv.textContent = `Selected Weight: ${selectedWeight} lbs`;
+        saveToLocalStorage();
+    });
+});
+
+// ✅ Handle Next Exercise button
+nextBtn.addEventListener('click', () => {
+    resetProgress();
+    selectedWeight = '';
+    selectedWeightDiv.textContent = '';
+    alert('Moved to next exercise!');
+    saveToLocalStorage();
+});
+
+// ✅ Update variables when user changes sidebar inputs
+repsInput.addEventListener('input', () => {
+    repsPerSet = parseInt(repsInput.value) || 1;
+    updateConfig();
+    updateProgress();
+    saveToLocalStorage();
+});
+
+setsInput.addEventListener('input', () => {
+    totalSets = parseInt(setsInput.value) || 1;
+    updateConfig();
+    updateProgress();
+    saveToLocalStorage();
+});
+
+// ✅ Log workout to Flask backend
+document.getElementById('complete-workout-btn').addEventListener('click', () => {
+    const savedData = JSON.parse(localStorage.getItem('workoutData'));
+    fetch('/log_workout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            date: new Date().toISOString().split('T')[0],
+            workout_type: 'Dashboard',
+            exercise: savedData.currentExercise,
+            sets: savedData.totalSets,
+            reps: savedData.repsPerSet,
+            weight: savedData.selectedWeight
+        })
+    })
+    .then(response => response.json())
+    .then(data => alert(data.message || 'Workout logged!'))
+    .catch(err => alert('Error logging workout: ' + err));
+});
+
+// ✅ Display routine in main panel
+function displayRoutine(routine) {
+    const exerciseContainer = document.getElementById('exercise-buttons');
+    exerciseContainer.innerHTML = '';
+    if (!routine.exercises || routine.exercises.length === 0) {
+        exerciseContainer.innerHTML = '<p>No routine loaded yet.</p>';
+        return;
+    }
+    routine.exercises.forEach(ex => {
+        const button = document.createElement('button');
+        button.textContent = ex.name;
+        button.style.padding = '10px';
+        button.style.borderRadius = '5px';
+        button.style.backgroundColor = '#007bff';
+        button.style.color = '#fff';
+        button.style.cursor = 'pointer';
+        button.addEventListener('click', () => {
+            exerciseTitle.textContent = `Current Exercise: ${ex.name}`;
+            repsPerSet = ex.reps;
+            totalSets = ex.sets;
+            selectedWeight = ex.weight.replace(' lbs', '');
+            selectedWeightDiv.textContent = `Selected Weight: ${selectedWeight} lbs`;
+            updateConfig();
+            resetProgress();
+            saveToLocalStorage();
+        });
+        exerciseContainer.appendChild(button);
+    });
+}
+
+// ✅ Generate new routine and display immediately
+generateRoutineBtn.addEventListener('click', () => {
+    fetch('/generate_routine', { method: 'POST' })
+        .then(response => response.json())
+        .then(routine => {
+            alert('New routine generated!');
+            displayRoutine(routine);
+            localStorage.setItem('lastRoutine', JSON.stringify(routine));
+        })
+        .catch(err => alert('Error generating routine: ' + err));
+});
+
+// ✅ Save routine with name and exercises
+saveRoutineBtn.addEventListener('click', () => {
+    const routineName = prompt("Enter routine name:", "My Routine");
+    if (!routineName) {
+        alert("Routine name is required!");
+        return;
+    }
+
+    const exercises = [];
+    document.querySelectorAll('#exercise-buttons button').forEach(btn => {
+        exercises.push({ name: btn.textContent, sets: totalSets, reps: repsPerSet, weight: selectedWeight + ' lbs' });
+    });
+
+    const routineData = { name: routineName, exercises };
+
+    fetch('/save_routine', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(routineData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message || 'Routine saved!');
+        loadRoutineList();
+    })
+    .catch(err => alert('Error saving routine: ' + err));
+});
+
+// ✅ Load selected routine by ID
+loadSelectedRoutineBtn.addEventListener('click', () => {
+    const selectedId = routineSelect.value;
+    if (!selectedId) {
+        alert('Please select a routine.');
+        return;
+    }
+    fetch(`/load_routine/${selectedId}`)
+        .then(response => response.json())
+        .then(displayRoutine)
+        .catch(err => alert('Error loading routine: ' + err));
+});
+
+// ✅ Populate dropdown with saved routines
+function loadRoutineList() {
+    fetch('/list_routines')
+        .then(response => response.json())
+        .then(routines => {
+            routineSelect.innerHTML = '<option value="">-- Choose a routine --</option>';
+            if (!routines || Object.keys(routines).length === 0) return;
+            for (const [id, routine] of Object.entries(routines)) {
+                const option = document.createElement('option');
+                option.value = id;
+                option.textContent = `${routine.name} (ID: ${id})`;
+                routineSelect.appendChild(option);
+            }
+        })
+        .catch(err => console.error('Failed to load routine list:', err));
+}
+
+// ✅ Initialize on page load
+window.addEventListener('load', () => {
+    loadFromLocalStorage();
+    updateConfig();
+    updateProgress();
+    loadRoutineList();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Routine Management</title>
+</head>
+<body>
+<nav>
+    <a href="/dashboard">Dashboard</a> | <a href="/routines">Manage Routines</a>
+</nav>
+
+<h1>Routine Management</h1>
+<table border="1" cellpadding="10">
+    <tr><th>ID</th><th>Name</th><th>Exercises</th><th>Actions</th></tr>
+    {% for id, routine in routines.items() %}
+    <tr>
+        <td>{{ id }}</td>
+        <td>{{ routine.name }}</td>
+        <td>
+            {% for ex in routine.exercises %}
+                {{ ex.name }} ({{ ex.sets }}x{{ ex.reps }})<br>
+            {% endfor %}
+        </td>
+        <td>
+            <button onclick="loadRoutine('{{ id }}')">Load</button>
+            <button onclick="deleteRoutine('{{ id }}')">Delete</button>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h2>Add New Routine</h2>
+<form id="addRoutineForm">
+    <input type="text" id="routineName" placeholder="Routine Name" required><br><br>
+    <textarea id="routineExercises" placeholder='[{"name":"Bench Press","sets":3,"reps":10,"weight":"100 lbs"}]' rows="5" cols="50" required></textarea><br><br>
+    <button type="submit">Save Routine</button>
+</form>
+
+<script>
+function loadRoutine(id) {
+    fetch(`/load_routine/${id}`)
+        .then(response => response.json())
+        .then(data => {
+            alert(`Routine "${data.name}" loaded! Go to Dashboard.`);
+            window.location.href = "/dashboard";
+        });
+}
+
+function deleteRoutine(id) {
+    fetch(`/delete_routine/${id}`, { method: 'DELETE' })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            location.reload();
+        });
+}
+
+document.getElementById('addRoutineForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const name = document.getElementById('routineName').value;
+    const exercises = JSON.parse(document.getElementById('routineExercises').value);
+
+    fetch('/save_routine', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, exercises })
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message);
+        location.reload();
+    });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+
+# **Document 1: Project Overview**
+
+***
+
+## **Purpose**
+
+The goal is to build a **modular workout tracking system** that is:
+
+*   **Lightweight and portable** (CSV for initial storage).
+*   **Sensor-integrated** (RFID, motion sensors, camera, smartwatch).
+*   **Future-proof** (easy migration to SQLite/PostgreSQL).
+*   **Tablet-friendly** (responsive UI with minimal typing).
+
+***
+
+## **Architecture Overview**
+
+The system follows a **three-tier modular design**:
+
+1.  **UI Layer (Tablet/Web)**
+    *   HTML/CSS/JS with Bootstrap for responsive design.
+    *   AJAX calls to Flask API using JSON.
+
+2.  **Backend Layer (Flask)**
+    *   Routes: `/add`, `/update`, `/dashboard`.
+    *   Handles JSON payloads from UI and sensors.
+    *   Writes/reads data from CSV (later DB).
+
+3.  **Data Layer**
+    *   Initial: CSV file with schema matching SQL.
+    *   Future: SQLite/PostgreSQL with same column names.
+
+***
+
+### **Workflow**
+
+1.  User logs workout via **tablet UI**.
+2.  Flask receives JSON → writes to **CSV**.
+3.  Dashboard reads CSV → displays progress.
+4.  Sensors send JSON payloads to Flask API.
+
+***
+
+## **Constraints**
+
+*   **CSV for initial storage** (simple, portable).
+*   **JSON for all communication** (UI → Flask → sensors).
+*   **Modular helper functions** for easy DB migration.
+*   **Consistent API endpoints** (`/add`, `/update`, `/dashboard` remain unchanged).
+
+***
+
+## **Future-Proofing**
+
+*   Column names in CSV match SQL schema:
+        date, exercise, reps, weight
+*   All data operations go through helper functions:
+    ```python
+    def add_workout(data):  # Replace with DB insert later
+        with open(CSV_FILE, 'a', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(data)
+    ```
+
+***
+
+## **Agile Alignment**
+
+*   **Epic 1:** Core system setup (Flask + CSV + JSON API).
+*   **Epic 2:** Tablet UI.
+*   **Epic 3:** Sensor integration.
+*   **Epic 4:** Data visualization.
+*   **Epic 5:** Advanced features.
+*   **Epic 6:** Deployment & testing.
+*   **Epic 7:** Database migration.
+
+***
+
+## **Text-Based Architecture Diagram**
+
+    +-------------------+        +-------------------+        +-------------------+
+    |   Tablet UI       |  --->  |   Flask Backend   |  --->  |   CSV Storage     |
+    | (HTML/CSS/JS)     |        | (Routes: /add,   |        | (date,exercise,   |
+    | Responsive Design |        |  /dashboard)     |        |  reps,weight)     |
+    +-------------------+        +-------------------+        +-------------------+
+            ^                           ^
+            |                           |
+            |                           |
+       Sensors (RFID, Camera, Motion, Smartwatch)
+       Send JSON payloads via REST API
+ architecture diagram as a PNG and embed it in the final package along with base64 for portability

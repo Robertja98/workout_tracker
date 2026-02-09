@@ -1,0 +1,124 @@
+
+<?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+require_once "utils.php";
+
+// Configuration
+$dataFolder = __DIR__ . "/data";
+$csvFile = $dataFolder . "/workouts.csv";
+$routinesFile = $dataFolder . "/routines.json";
+$headers = ["date", "workout_type", "exercise", "sets", "reps", "weight", "duration", "notes"];
+
+// Initialize CSV
+initialize_csv($csvFile, $headers);
+
+// Routing
+$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$method = $_SERVER['REQUEST_METHOD'];
+
+// Dashboard route
+if ($uri === "/dashboard") {
+    include "dashboard.php";
+    exit;
+}
+
+// Home page route
+if ($uri === "/") {
+    $workouts = read_workouts($csvFile);
+
+    // Handle form submission
+    if ($method === "POST" && isset($_POST['exercise'])) {
+        $newWorkout = [
+            date("Y-m-d"),
+            $_POST['workout_type'],
+            $_POST['exercise'],
+            $_POST['sets'],
+            $_POST['reps'],
+            $_POST['weight'],
+            $_POST['duration'],
+            $_POST['notes']
+        ];
+        add_workout($csvFile, $headers, $newWorkout);
+        header("Location: /");
+        exit;
+    }
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Workout Tracker</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        form { margin-top: 20px; }
+        input, select, textarea { width: 100%; padding: 8px; margin: 5px 0; }
+        button { padding: 10px 15px; background: #28a745; color: white; border: none; cursor: pointer; }
+        button:hover { background: #218838; }
+    </style>
+</head>
+<body>
+    <h1>Workout Tracker</h1>
+
+    <h2>Workouts</h2>
+    <table>
+        <thead>
+            <tr>
+                <?php foreach ($headers as $header): ?>
+                    <th><?= htmlspecialchars($header) ?></th>
+                <?php endforeach; ?>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($workouts as $workout): ?>
+                <tr>
+                    <?php foreach ($headers as $header): ?>
+                        <td><?= htmlspecialchars($workout[$header]) ?></td>
+                    <?php endforeach; ?>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+
+    <h2>Add New Workout</h2>
+    <form method="POST">
+        <label>Workout Type:</label>
+        <input type="text" name="workout_type" required>
+
+        <label>Exercise:</label>
+        <input type="text" name="exercise" required>
+
+        <label>Sets:</label>
+        <input type="number" name="sets" required>
+
+        <label>Reps:</label>
+        <input type="number" name="reps" required>
+
+        <label>Weight (e.g., 150lbs):</label>
+        <input type="text" name="weight">
+
+        <label>Duration (e.g., 45min):</label>
+        <input type="text" name="duration">
+
+        <label>Notes:</label>
+        <textarea name="notes"></textarea>
+
+        <button type="submit">Add Workout</button>
+    </form>
+
+    <hr>
+    <h2>Manage Routines</h2>
+    <p><a href="/routines">View Routines</a></p>
+    <p><a href="/dashboard">View Dashboard</a></p>
+</body>
+</html>
+<?php
+    exit;
+}
+
+// Fallback for unknown routes
+echo "<h1>404 - Page Not Found</h1>";
+?>

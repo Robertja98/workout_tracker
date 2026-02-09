@@ -1,0 +1,31 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Workout</title>
+    <!-- Link to external CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<body class="body-general">
+<nav>
+    <a href="/">Home</a> |
+    <a href="/add">Add Workout</a> |
+    <a href="/dashboard">Dashboard</a>
+</nav>
+
+    <h1>Add Workout</h1>
+    <form method="POST" action="/add">
+        <label>Date:</label> <input type="date" name="date" required><br>
+        <label>Workout Type:</label> <input type="text" name="workout_type" required><br>
+        <label>Exercise:</label> <input type="text" name="exercise" required><br>
+        <label>Sets:</label> <input type="number" name="sets"><br>
+        <label>Reps:</label> <input type="number" name="reps"><br>
+        <label>Weight:</label> <input type="text" name="weight"><br>
+        <label>Duration:</label> <input type="text" name="duration"><br>
+        <label>Notes:</label> <textarea name="notes"></textarea><br>
+        <button type="submit">Add Workout</button>
+    </form>
+    <a href="/">Back to Home</a>
+</body>
+</html>

@@ -1,0 +1,58 @@
+Document 6: Deployment & Testing
+
+Purpose
+Ensure the system runs reliably in both local development and containerized environments.
+
+Local Deployment Steps
+
+Install dependencies:
+Shellpip install flask requests mediapipe opencv-pythonShow more lines
+
+Run Flask app:
+Shellpython app.pyShow more lines
+
+Access UI:
+
+Open http://localhost:5000 in a browser.
+
+
+Test JSON → CSV flow:
+
+Use Postman or curl:
+Shellcurl -X POST http://localhost:5000/add \-H "Content-Type: application/json" \-d '{"date":"2026-01-18","exercise":"Squat","reps":10,"weight":80}'Show more lines
+
+
+
+
+
+Testing Checklist
+✔ Verify /add route accepts JSON and writes to CSV.
+✔ Confirm /dashboard displays updated data.
+✔ Test UI on tablet (responsive layout).
+✔ Validate sensor scripts send correct JSON payloads.
+✔ Check CSV file integrity after multiple writes.
+
+Debugging Common Issues
+
+CORS errors: Add Flask-CORS if needed.
+File permission issues: Ensure data/workouts.csv is writable.
+Sensor connectivity: Check Wi-Fi credentials and API URL.
+
+
+Docker Deployment
+Dockerfile
+DockerfileFROM python:3.10-slimWORKDIR /appCOPY requirements.txt requirements.txtRUN pip install -r requirements.txtCOPY . .EXPOSE 5000CMD ["python", "app.py"]Show more lines
+requirements.txt
+flask
+requests
+mediapipe
+opencv-python
+
+Build & Run
+Shelldocker build -t workout-tracker .docker run -d -p 5000:5000 workout-trackerShow more lines
+
+Diagram: Deployment Flow
+[Local Dev] ---> [Docker Container] ---> [Production Server]
+
+
+✅ Document 6 is complete!

@@ -1,0 +1,22 @@
+date,workout_type,exercise,sets,reps,weight,duration,notes
+,,,,,,,
+2026-01-19,Strength,Bench Press,3,10,100 lbs,30 mins,Felt strong today
+2026-01-19,Strength,Bench Press,3,10,100 lbs,30 mins,Felt strong today
+2026-01-20,Strength Training,Squats,4,8-10,Moderate,50 minutes,Warm-up and cool-down included.
+2026-01-20,Full Body Strength,Dynamic Warm-Up,1,10 min,Bodyweight,60 minutes,"Warm-up: dynamic stretches. Cool-down: hamstring, chest, shoulder stretches."
+2026-01-20,Full Body Strength,Squats,4,8-10,Moderate to heavy,60 minutes,"Warm-up: dynamic stretches. Cool-down: hamstring, chest, shoulder stretches."
+2026-01-20,Full Body Strength,Bench Press,4,8-10,Moderate to heavy,60 minutes,"Warm-up: dynamic stretches. Cool-down: hamstring, chest, shoulder stretches."
+2026-01-20,Full Body Strength,Deadlift,3,6-8,Heavy,60 minutes,"Warm-up: dynamic stretches. Cool-down: hamstring, chest, shoulder stretches."
+2026-01-20,Full Body Strength,Shoulder Press,3,10,Moderate,60 minutes,"Warm-up: dynamic stretches. Cool-down: hamstring, chest, shoulder stretches."
+2026-01-20,Full Body Strength,Barbell Rows,3,10,Moderate,60 minutes,"Warm-up: dynamic stretches. Cool-down: hamstring, chest, shoulder stretches."
+2026-01-20,Full Body Strength,Plank,3,45 sec,Bodyweight,60 minutes,"Warm-up: dynamic stretches. Cool-down: hamstring, chest, shoulder stretches."
+2026-01-20,Full Body Strength,Cool-Down Stretch,1,10 min,Bodyweight,60 minutes,"Warm-up: dynamic stretches. Cool-down: hamstring, chest, shoulder stretches."
+2026-01-21,Dashboard,Push-Ups,3,10,,,
+2026-01-21,Dashboard,Triceps Pushdown,,,,,
+2026-01-21,Dashboard,Triceps Pushdown,3,10,,,
+2026-01-21,Dashboard,Triceps Pushdown,3,8,,,
+2026-01-22,Dashboard,Triceps Pushdown,3,8,90,,
+2026-01-22,Dashboard,Triceps Pushdown,3,8,120,,
+2026-01-22,Dashboard,Bench Press,3,10,100,,
+2026-01-22,Dashboard,Bench Press,3,10,100,,
+2026-01-22,Dashboard,Bicep Curls,3,12,30,,

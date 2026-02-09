@@ -1,0 +1,13 @@
+
+# exercises.py
+exercise_db = [
+    {"name": "Bench Press", "category": "Push", "default_sets": 4, "default_reps": 8},
+    {"name": "Incline Dumbbell Press", "category": "Push", "default_sets": 3, "default_reps": 10},
+    {"name": "Triceps Pushdown", "category": "Push", "default_sets": 3, "default_reps": 12},
+    {"name": "Lat Pulldown", "category": "Pull", "default_sets": 4, "default_reps": 8},
+    {"name": "Barbell Row", "category": "Pull", "default_sets": 3, "default_reps": 10},
+    {"name": "Dumbbell Curl", "category": "Pull", "default_sets": 3, "default_reps": 12},
+    {"name": "Squat", "category": "Legs", "default_sets": 4, "default_reps": 8},
+    {"name": "Deadlift", "category": "Legs", "default_sets": 3, "default_reps": 6},
+    {"name": "Lunge", "category": "Legs", "default_sets": 3, "default_reps": 12}
+]
