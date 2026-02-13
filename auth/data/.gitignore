@@ -1,0 +1,6 @@
+# Protect user authentication data
+/auth/data/
+*.csv
+
+# Protect configuration
+/auth/config.php

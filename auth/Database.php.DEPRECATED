@@ -1,0 +1,10 @@
+# DEPRECATED - No Longer Used
+
+This file is no longer used. The authentication system now uses **CSV files** with the `CsvDataStore.php` class instead of SQL databases.
+
+For the current implementation, see:
+- `CsvDataStore.php` - CSV data handler
+- `Auth.php` - Uses CsvDataStore instead of Database
+- `README.md` - Full documentation
+
+The new CSV-based system is simpler and requires no database setup!

@@ -2,6 +2,29 @@
 
 A simple PHP workout tracker with routines, progress tracking, and a dashboard.
 
+## 🔐 Authentication System
+
+This project now includes a **secure, modular authentication system** with:
+
+- User registration and login
+- Password security (Argon2ID hashing)
+- Session management
+- Rate limiting and account lockout
+- Activity logging and audit trails
+- CSRF protection
+- 2026 security best practices
+- **CSV-based storage (no database required!)**
+
+### Quick Setup
+
+1. Visit `http://localhost/Workout/auth/install.php` to check system requirements
+2. CSV files are created automatically - no database setup needed!
+3. Visit `http://localhost/Workout/auth/register.php` to create an account
+
+For detailed setup instructions, see [auth/SETUP.md](auth/SETUP.md).
+
+For full documentation and reusability guide, see [auth/README.md](auth/README.md).
+
 ## Run with XAMPP (Windows)
 
 1. Open XAMPP Control Panel and start **Apache**.

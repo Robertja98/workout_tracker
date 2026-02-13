@@ -1,0 +1,10 @@
+# DEPRECATED - No Longer Used
+
+This file is no longer used. The authentication system now uses **CSV files** instead of a SQL database.
+
+For the new setup instructions, see:
+- `README.md` - Full documentation
+- `SETUP.md` - Setup guide
+- `CSV_MIGRATION.md` - Migration explanation
+
+The new CSV-based system is simpler and requires no database setup!
