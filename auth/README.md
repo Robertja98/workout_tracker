@@ -38,28 +38,15 @@ A secure, modern, and reusable authentication system for PHP applications. Built
 cp -r auth /path/to/your/project/
 ```
 
-### 2. Set up the database
-
-```sql
-CREATE DATABASE your_db_name CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-mysql -u root -p your_db_name < auth/schema.sql
-```
-
-### 3. Configure the system
+### 2. Configure the system
 
 ```bash
 cd auth
 cp config.example.php config.php
-# Edit config.php with your database credentials
+# No database setup required! Edit config.php to customize settings (optional)
 ```
 
-```bash
-cd auth
-cp config.example.php config.php
-# Edit config.php to customize settings
-```
-
-### 4. Protect your pages
+### 3. Protect your pages
 
 Add this to the top of any page that requires authentication:
 
@@ -70,7 +57,7 @@ require_once __DIR__ . '/auth/middleware.php';
 ?>
 ```
 
-### 5. Add login/logout links
+### 4. Add login/logout links
 
 ```php
 <!-- Login link -->
@@ -219,10 +206,7 @@ return [
 ];
 ```
 
-## Database Tables
-
-The system creates these tables:
- Files
+## CSV Data Files
 
 The system creates these CSV files automatically in `auth/data/`:
 
@@ -232,6 +216,9 @@ The system creates these CSV files automatically in `auth/data/`:
 - **activity_log.csv** - User activity audit trail
 
 **Important:** Add `auth/data/` to your `.gitignore` to protect user data!
+
+## Migration & Integration
+
 ### 1. Preserve existing sessions
 
 If you have existing session handling, you may need to merge it with the auth system.
@@ -241,7 +228,6 @@ you can read the user ID from the auth system and use it to filter your existing
 
 ### 3. Migrate existing users
 
-If you have existing users in JSON/CSV file
 If you have existing users, create them in the auth system:
 
 ```php
@@ -354,23 +340,166 @@ Create `auth/forgot_password.php` and `auth/reset_password.php`.
 
 ### "Configuration file not found"
 
-Create `auth/config.php` from `auth/config.example.php`.
+Create `auth/config.php` from `auth/config.example.php`:
 
-### "Permission denied" errors
+```bash
+cd auth
+cp config.example.php config.php
+```
 
-Make sure the web server can write to the `auth/data/` directory:
+### "Permission denied" or "403 Forbidden" errors
+
+This usually means the web server cannot write to the `auth/data/` directory.
+
+**On Linux/Mac:**
 
 ```bash
 chmod 755 auth/data/
+chmod 644 auth/data/*.csv
 ```
 
-### "Too many login attempts"
+**On Windows (Command Prompt as Administrator):**
 
-Wait 15 minutes or manually edit `auth/data/login_attempts.csv` to remove old attempts.
+```batch
+icacls "auth\data" /grant:r "%USERNAME%:(OI)(CI)F" /T
+icacls "auth\data" /inheritance:e
+```
 
-### Session issues
+**On Windows (PowerShell as Administrator):**
 
-Make sure session cookies are enabled and check cookie security settings.
+```powershell
+$path = "C:\path\to\auth\data"
+icacls $path /grant:r Everyone:(OI)(CI)F /T
+attrib -R $path /S /D
+```
+
+**On Windows with OneDrive:**
+
+If your project is in OneDrive, file locking may prevent writes:
+
+1. **Disable sync on the folder:**
+   - Right-click the folder in OneDrive
+   - Select "Always keep on this device"
+
+2. **Or move the data directory outside OneDrive:**
+   ```php
+   // In config.php
+   return [
+       'storage' => [
+           'data_dir' => sys_get_temp_dir() . '/auth_data',  // Use temp folder instead
+       ],
+   ];
+   ```
+
+3. **Or check folder permissions:**
+   - Right-click `auth/data` → Properties → Security → Edit
+   - Grant Full Control to your user
+   - Click Apply → OK
+
+**Run the diagnostic tool to verify permissions:**
+
+Visit `http://localhost/auth/test_permissions.php` to check if the directory is writable.
+
+### "Cannot write to CSV file"
+
+**Cause:** The CSV files are locked or the directory permission is restricted.
+
+**Solution:**
+1. Run the diagnostic: `http://localhost/auth/test_permissions.php`
+2. Check `auth/data/` directory permissions (see above)
+3. Ensure no other process is editing the CSV files
+4. Try restarting the web server: `sudo systemctl restart apache2` (Linux) or restart Apache/Nginx in services
+
+### "Too many login attempts" error
+
+After 5 failed login attempts, the account locks for 15 minutes.
+
+**To reset immediately:**
+
+1. Edit `auth/data/login_attempts.csv` and remove entries for that user
+2. Or delete the entire file (it will be recreated)
+
+**To increase the limit:**
+
+Edit `auth/config.php`:
+
+```php
+'security' => [
+    'max_login_attempts' => 10,  // Change from 5
+    'lockout_duration' => 1800,  // 30 minutes instead of 15
+],
+```
+
+### "Session issues" or "Cannot stay logged in"
+
+**Check cookie settings:**
+
+1. Visit `http://localhost/auth/test.php` and look for cookie warnings
+2. Make sure you've waited after changing config.php (PHP may cache)
+3. Clear your browser cookies and try again
+4. Check that PHP `session.save_path` is writable:
+   ```bash
+   php -i | grep session.save_path
+   ```
+
+**Fix on Windows:**
+
+Edit `php.ini` and set:
+
+```ini
+session.save_path = "C:\Windows\Temp"
+```
+
+Then restart Apache/web server.
+
+### CSV directory not created automatically
+
+If `auth/data/` doesn't exist:
+
+1. Create it manually:
+   ```bash
+   mkdir auth/data
+   ```
+
+2. Set permissions:
+   ```bash
+   chmod 755 auth/data
+   ```
+
+3. Visit `http://localhost/auth/install.php` to verify the setup
+
+### "Argon2ID not available"
+
+**Error:** "Password hashing requires Argon2ID"
+
+**Solution:**
+
+Check PHP version:
+```bash
+php -v
+```
+
+Must be PHP 7.2+. If older, upgrade PHP or install a newer version.
+
+Verify Argon2ID is available:
+```bash
+php -i | grep argon
+```
+
+If not enabled, edit `php.ini` and enable it (usually already enabled in PHP 7.4+).
+
+### Debugging
+
+Turn on logging in `auth/config.php`:
+
+```php
+'logging' => [
+    'enabled' => true,
+    'file' => __DIR__ . '/data/debug.log',
+],
+```
+
+Then check `auth/data/debug.log` for detailed error messages.
 
 ## License
 
@@ -380,10 +509,10 @@ This authentication system is provided as-is for use in your projects. Modify as
 
 For issues specific to this auth system, check:
 
-1. Database connection and credentials
-2. PHP version (requires PHP 7.4+)
-3. Session configuration
-4. File permissions
+1. PHP version (requires PHP 7.4+)
+2. File permissions on `auth/data/` directory
+3. Session configuration and cookie settings
+4. See **Troubleshooting** section below for common issues
 
 ## Contributing
 

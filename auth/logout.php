@@ -15,6 +15,6 @@ $config = require $configFile;
 $auth = new Auth($config);
 $auth->logout();
 
-// Redirect to login page
-header('Location: login.php');
+// Redirect to auth landing page
+header('Location: index.php');
 exit;

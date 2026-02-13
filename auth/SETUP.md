@@ -18,39 +18,117 @@ The auth/config.php file is already created with default settings. The only thin
 
 CSV files will be automatically created in the `auth/data/` directory when you first use the system.
 
-### 3. Test the Authentication System
+### 3. Fix File Permissions
+
+The `auth/data/` directory must be writable by the web server.
+
+**Windows (XAMPP):**
+```batch
+icacls "C:\xampp\htdocs\Workout\auth\data" /grant:r Everyone:(OI)(CI)F /T
+attrib -R "C:\xampp\htdocs\Workout\auth\data" /S /D
+```
+
+**Linux/Mac:**
+```bash
+chmod 755 auth/data
+chown www-data:www-data auth/data  # For Apache
+```
+
+**Test permissions:** Visit `http://localhost/Workout/auth/test_permissions.php`
+
+### 4. Troubleshoot OneDrive Issues
+
+If you get "Directory not writable" error and files are on OneDrive:
+
+**Option A: Disable OneDrive sync (Quick fix)**
+- Right-click `auth/data/` folder → **Always keep on this device**
+
+**Option B: Move to non-OneDrive location (Recommended)**
+
+Edit `auth/config.php`:
+```php
+'storage' => [
+    'data_dir' => 'C:\\xampp\\htdocs\\workout_data',  // Use non-OneDrive path
+],
+```
+
+**Option C: Use system temp directory**
+```php
+'storage' => [
+    'data_dir' => sys_get_temp_dir() . '/workout_auth_data',
+],
+```
+
+### 5. Test the Authentication System
 
 1. Visit: http://localhost/Workout/auth/register.php
 2. Create a test account
 3. Login at: http://localhost/Workout/auth/login.php
 
-### 4. Protect Your Pages
+### 6. Protect Your Pages
 
 To require authentication for a page, add this at the top:
 
 ```php
 <?php
 require_once __DIR__ . '/auth/middleware.php';
-// Rest of your page code
-?>
+// File Permissions Guide
+
+### Windows Permissions
+
+```batch
+# Check current permissions
+icacls "C:\path\to\auth\data"
+
+# Grant full permissions
+icacls "C:\path\to\auth\data" /grant:r Everyone:(OI)(CI)F /T
+
+# Remove ReadOnly attribute
+attrib -R "C:\path\to\auth\data" /S /D
 ```
 
-## Security Checklist
+### Linux/Mac Permissions
 
-- [ ] Set proper file permissions on auth/data/ directory (755)
-- [ ] Add auth/data/ to .gitignore to protect user data
-- [ ] Set `session_cookie_secure` to `true` when using HTTPS
-- [ ] Update `admin_email` in config
-- [ ] Enable HTTPS in production
-- [ ] Uncomment HSTS header in `security_headers.php` when using HTTPS
-- [ ] Review and adjust Content Security Policy as needed
-- [ ] Set up regular backups of auth/data/ directory
-- [ ] Monitor `activity_log.csv` for suspicious activity
+```bash
+# Set directory permissions
+chmod 755 auth/data
+chmod 644 auth/data/*
 
-## Production Considerations
+# Set owner (for Apache)
+chown -R www-data:www-data auth/data
 
-### Enable HTTPS
+# For Nginx
+chown -R nobody:nobody auth/data
+```
 
+## Maintenance
+
+### Clean Old Sessions & Logs
+
+Run this script regularly:
+
+```bash
+php auth/maintenance.php
+```
+
+Or create a cron job:
+```bash
+0 2 * * * php /path/to/auth/maintenance.php
+```
+
+### Monitor Failed Login Attempts
+
+Check the `auth/data/login_attempts.csv` file for patterns of failed logins.
+
+### Backup User Data
+
+```bash
+# Windows
+xcopy "auth\data" "backup\auth-data-%date%" /E /I
+
+# Linux/Mac
+cp -r auth/data backup/auth-data-$(date +%Y%m%d)
+```
 1. Get an SSL certificate (Let's Encrypt is free)
 2. Update `session_cookie_secure` to `true` in config
 3. Uncomment HSTS header in `security_headers.php`

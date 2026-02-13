@@ -491,13 +491,22 @@ class Auth {
     }
     
     private function getIpAddress() {
-        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-            return $_SERVER['HTTP_CLIENT_IP'];
-        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-            return $_SERVER['HTTP_X_FORWARDED_FOR'];
-        } else {
-            return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+        // Handle proxy headers safely to prevent IP spoofing
+        if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            // X-Forwarded-For can contain multiple IPs (client, proxy1, proxy2)
+            // Take the first IP (the client's IP) and validate it
+            $ips = array_map('trim', explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']));
+            $clientIp = $ips[0];
+            if (filter_var($clientIp, FILTER_VALIDATE_IP)) {
+                return $clientIp;
+            }
         }
+        
+        if (!empty($_SERVER['HTTP_CLIENT_IP']) && filter_var($_SERVER['HTTP_CLIENT_IP'], FILTER_VALIDATE_IP)) {
+            return $_SERVER['HTTP_CLIENT_IP'];
+        }
+        
+        return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
     }
     
     /**

@@ -36,6 +36,10 @@ function initUserTab() {
         if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) {
             return;
         }
+        // Skip auth pages
+        if (href.includes('/auth/') || href.includes('auth/')) {
+            return;
+        }
         try {
             const url = new URL(href, window.location.href);
             if (url.origin !== window.location.origin) {

@@ -1,5 +1,6 @@
 
 <?php
+require_once __DIR__ . "/auth/middleware.php";
 require_once __DIR__ . "/user_context.php";
 user_bootstrap();
 $currentUser = user_get_current();
@@ -47,15 +48,22 @@ $lastSession = $recentSessions[0] ?? null;
     <header class="topbar">
         <div class="brand">Workout</div>
         <nav class="topnav">
-            <a class="user-indicator" href="users.php">Active: <?= htmlspecialchars($currentUser['name'] ?? 'User') ?></a>
-            <a href="index.php" class="active">Progress Hub</a>
-            <a href="session.php">Session Mode</a>
-            <a href="dashboard.php">Dashboard</a>
-            <a href="goals.php">Goals</a>
-            <a href="compare.php">Compare</a>
-            <a href="users.php">Users</a>
-            <a href="routines.php">Routines</a>
-            <a href="tracked_sets.php">Tracked Sets</a>
+            <?php if (auth_check()): ?>
+                <span class="user-indicator">👤 <?= htmlspecialchars(auth_current_user()['username']) ?></span>
+                <a href="index.php" class="active">Progress Hub</a>
+                <a href="session.php">Session Mode</a>
+                <a href="dashboard.php">Dashboard</a>
+                <a href="goals.php">Goals</a>
+                <a href="compare.php">Compare</a>
+                <a href="users.php">Users</a>
+                <a href="routines.php">Routines</a>
+                <a href="tracked_sets.php">Tracked Sets</a>
+                <a href="/Workout/auth/logout.php" class="logout-link">Logout</a>
+            <?php else: ?>
+                <span class="user-indicator">Not logged in</span>
+                <a href="/auth/login.php" class="btn-small">Login</a>
+                <a href="/auth/register.php" class="btn-small">Register</a>
+            <?php endif; ?>
         </nav>
     </header>
 
