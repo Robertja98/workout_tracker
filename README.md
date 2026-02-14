@@ -38,6 +38,10 @@ mklink /J "C:\xampp\htdocs\Workout" "C:\Users\rober\OneDrive\Personal\Workout"
 
 3. Visit: http://localhost/Workout/index.php
 
+## Deployment
+
+Deployment guide: [DEPLOYMENT.md](DEPLOYMENT.md).
+
 ## Data files
 
 - `data/routines.json` stores routines.
