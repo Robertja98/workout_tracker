@@ -3,3 +3,4 @@ deployment:
     - export DEPLOYPATH=/home/hp6xh47j1ds2/public_html/fitness.eclipsewatertechnologies.com
     - /bin/cp -r * $DEPLOYPATH
     - if [ ! -f "$DEPLOYPATH/auth/config.php" ] && [ -f "$DEPLOYPATH/auth/config.example.php" ]; then cp "$DEPLOYPATH/auth/config.example.php" "$DEPLOYPATH/auth/config.php"; fi
+    - /usr/bin/php $DEPLOYPATH/auth/setup-deployment.php
