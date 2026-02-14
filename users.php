@@ -105,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </select>
             </div>
             <a href="index.php">Progress Hub</a>
-            <a href="/Workout/session.php">Session Mode</a>
+            <a href="/session.php">Session Mode</a>
             <a href="dashboard.php">Dashboard</a>
             <a href="goals.php">Goals</a>
             <a href="compare.php">Compare</a>

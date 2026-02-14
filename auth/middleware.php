@@ -23,7 +23,7 @@ $auth = new Auth($config);
 if (!$auth->isAuthenticated()) {
     // Store the current URL for redirect after login
     $currentUrl = $_SERVER['REQUEST_URI'];
-    $loginUrl = '/Workout/auth/login.php?redirect=' . urlencode($currentUrl);
+    $loginUrl = '/auth/login.php?redirect=' . urlencode($currentUrl);
     
     header('Location: ' . $loginUrl);
     exit;

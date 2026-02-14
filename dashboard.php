@@ -76,7 +76,7 @@ usort($historySessions, function ($a, $b) {
                 </select>
             </div>
             <a href="index.php">Progress Hub</a>
-            <a href="/Workout/session.php">Session Mode</a>
+            <a href="/session.php">Session Mode</a>
             <a href="dashboard.php" class="active">Dashboard</a>
             <a href="goals.php">Goals</a>
             <a href="compare.php">Compare</a>
@@ -94,7 +94,7 @@ usort($historySessions, function ($a, $b) {
                 <p class="lede">Charts and tables that summarize your training trends.</p>
             </div>
             <div class="hero-actions">
-                <a class="btn btn-green" href="/Workout/session.php">Start Session</a>
+                <a class="btn btn-green" href="/session.php">Start Session</a>
                 <a class="btn btn-blue" href="routines.php">Manage Routines</a>
             </div>
         </section>

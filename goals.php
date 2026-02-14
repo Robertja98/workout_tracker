@@ -401,7 +401,7 @@ $today = date('Y-m-d');
                 </select>
             </div>
             <a href="index.php">Progress Hub</a>
-            <a href="/Workout/session.php">Session Mode</a>
+            <a href="/session.php">Session Mode</a>
             <a href="dashboard.php">Dashboard</a>
             <a href="goals.php" class="active">Goals</a>
             <a href="compare.php">Compare</a>
@@ -419,7 +419,7 @@ $today = date('Y-m-d');
                 <p class="lede">Set your targets and track progress across weight, strength, and consistency.</p>
             </div>
             <div class="hero-actions">
-                <a class="btn btn-green" href="/Workout/session.php">Start Session</a>
+                <a class="btn btn-green" href="/session.php">Start Session</a>
                 <a class="btn btn-blue" href="dashboard.php">Open Dashboard</a>
             </div>
         </section>

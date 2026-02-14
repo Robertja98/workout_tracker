@@ -58,7 +58,7 @@ $lastSession = $recentSessions[0] ?? null;
                 <a href="users.php">Users</a>
                 <a href="routines.php">Routines</a>
                 <a href="tracked_sets.php">Tracked Sets</a>
-                <a href="/Workout/auth/logout.php" class="logout-link">Logout</a>
+                <a href="/auth/logout.php" class="logout-link">Logout</a>
             <?php else: ?>
                 <span class="user-indicator">Not logged in</span>
                 <a href="/auth/login.php" class="btn-small">Login</a>
