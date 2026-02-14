@@ -63,32 +63,18 @@ Git Version Control -> (Your Repo) -> Manage -> Pull or Deployment Logs
 
 ## Notes
 
-- This repository is a PHP app, so no build step is required.
+- This repository is a PHP app with **zero hardcoded domain paths**.
 - `.cpanel.yml` must be at the repo root (not inside a subfolder).
-- **Per-Domain Setup**: When deploying to a new domain, update `auth/config.example.php` with the correct `base_url` before committing. This ensures the auto-copied config is domain-aware.
+- **Auto-Detection**: The app auto-detects your domain from the current request, so `base_url` can remain empty in `config.php`.
 - For Laravel or Node apps, you can add build commands to the tasks list.
 
 ## Multi-Domain Deployment
 
-To deploy to multiple domains using the same repo:
+Because the app auto-detects domains, you can deploy to **any number of domains with the same codebase**:
 
-**Before deployment to a new domain:**
-
-1. Update your local `auth/config.example.php`:
-   ```php
-   'base_url' => 'https://your-new-domain.com',
-   ```
-
-2. Commit and push:
-   ```bash
-   git add auth/config.example.php
-   git commit -m "Update base_url for new domain"
-   git push
-   ```
-
-3. In that domain's cPanel, update `.cpanel.yml` with the new path:
+1. Set up the repo in cPanel → Git Version Control for each domain.
+2. Update `.cpanel.yml` with the new domain's path:
    ```yaml
    - export DEPLOYPATH=/home/hp6xh47j1ds2/public_html/your-new-domain.com
    ```
-
-4. Push and cPanel will deploy automatically with the correct domain in `config.php`.
+3. Push and deploy—the app will automatically use the correct domain.

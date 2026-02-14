@@ -42,7 +42,7 @@ return [
     // Application settings
     'app' => [
         'name' => 'Workout Tracker',
-        'base_url' => 'https://fitness.eclipsewatertechnologies.com',
+        'base_url' => '',  // Leave empty to auto-detect from current request; or set explicitly
         'require_email_verification' => false,
         'enable_2fa' => false,
         'admin_email' => 'admin@example.com',
