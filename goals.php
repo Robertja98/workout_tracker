@@ -441,7 +441,11 @@ $today = date('Y-m-d');
         <section class="panel" id="goalPsychPanel">
             <h2 style="color:#4bbf73;">Identify Your Why</h2>
             <div id="motivationCloud" style="margin-bottom:1em; min-height: 60px; transition: opacity 0.5s, transform 0.5s;"></div>
-            <div id="motivationStatic" style="margin-bottom:1em; display:none;"></div>
+            <div id="motivationStatic" style="margin-bottom:1em;"></div>
+            <div id="motivationPreview" style="margin-bottom:1em; display:none;">
+                <div style="font-weight:bold; color:#4bbf73; margin-bottom:0.3em;">Your Motivation for Today:</div>
+                <div id="motivationPreviewPills"></div>
+            </div>
             <form id="motivationForm" method="post" style="margin-bottom:1em;">
                 <input type="hidden" name="action" value="save_motivation">
                 <input type="hidden" id="selectedWordsInput" name="selected_words" value="">
@@ -458,6 +462,7 @@ $today = date('Y-m-d');
             #motivationCloud.fade-out { opacity: 0; transform: scale(0.95); }
             #motivationCloud.fade-in { opacity: 1; transform: scale(1); }
             .motivation-static-pill { display:inline-block; background:#4bbf73; color:#fff; font-size:2em; font-weight:bold; border-radius:18px; padding:0.4em 1.2em; margin:0.5em 0; box-shadow:0 2px 8px #4bbf7322; letter-spacing:0.02em; }
+            #motivationPreviewPills .motivation-static-pill { font-size:1.3em; margin:0.2em 0.3em; padding:0.3em 1em; }
             </style>
             <script>
             // Motivational words to float
@@ -503,6 +508,16 @@ $today = date('Y-m-d');
                 document.getElementById('changeMotivationBtn').style.display = cloudFrozen ? '' : 'none';
                 document.getElementById('doneMotivationBtn').style.display = cloudFrozen ? 'none' : '';
                 document.getElementById('saveMotivationBtn').style.display = cloudFrozen ? '' : 'none';
+                // Live preview section
+                const previewDiv = document.getElementById('motivationPreview');
+                const previewPills = document.getElementById('motivationPreviewPills');
+                if (selectedMotivations.length > 0) {
+                    previewDiv.style.display = '';
+                    previewPills.innerHTML = selectedMotivations.map(word => `<span class='motivation-static-pill'>${word}</span>`).join(' ');
+                } else {
+                    previewDiv.style.display = 'none';
+                    previewPills.innerHTML = '';
+                }
                 if (animate) {
                     cloud.classList.remove('fade-in');
                     cloud.classList.add('fade-out');
@@ -554,33 +569,8 @@ $today = date('Y-m-d');
                 }
                 cloudFrozen = true;
                 document.getElementById('selectedWordsInput').value = selectedMotivations.join(', ');
-                // Show all pills, but only selected ones are highlighted and static
-                cloud.innerHTML = '';
-                currentCloudWords.forEach(word => {
-                    const span = document.createElement('span');
-                    span.textContent = word;
-                    span.className = selectedMotivations.includes(word) ? 'motivation-static-pill' : 'motivation-word';
-                    span.style.margin = '0.3em';
-                    span.style.display = 'inline-block';
-                    span.style.padding = '0.3em 0.7em';
-                    span.style.borderRadius = '16px';
-                    if (selectedMotivations.includes(word)) {
-                        span.style.background = '#4bbf73';
-                        span.style.color = '#fff';
-                        span.style.fontWeight = 'bold';
-                        span.style.fontSize = '2em';
-                    } else {
-                        const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
-                        const fontSize = fontSizes[Math.floor(Math.random() * fontSizes.length)];
-                        span.style.background = color;
-                        span.style.color = '#222';
-                        span.style.fontWeight = 'normal';
-                        span.style.fontSize = fontSize + 'px';
-                    }
-                    cloud.appendChild(span);
-                });
-                staticDiv.style.display = 'none';
-                cloud.style.display = '';
+                // Show all selected pills in the preview section (now always visible)
+                renderCloud();
                 document.getElementById('changeMotivationBtn').style.display = '';
                 document.getElementById('saveMotivationBtn').style.display = '';
             };
