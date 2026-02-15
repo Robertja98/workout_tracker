@@ -113,7 +113,7 @@ class Auth {
         if ($this->isRateLimited($usernameOrEmail, $ip)) {
             return [
                 'success' => false,
-                'error' => 'Too many login attempts. Please try again later.',
+                'error' => 'Too many failed login attempts. Your account or IP is temporarily locked for security reasons. Please wait 15 minutes before trying again.',
             ];
         }
         
