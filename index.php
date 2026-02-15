@@ -1,9 +1,12 @@
 
 <?php
+
 require_once __DIR__ . "/auth/middleware.php";
 require_once __DIR__ . "/user_context.php";
 user_bootstrap();
 $currentUser = user_get_current();
+
+
 
 $progress = user_load_data('progress.json', []);
 $sessions = user_load_data('sessions.json', []);
@@ -46,23 +49,23 @@ $lastSession = $recentSessions[0] ?? null;
 </head>
 <body class="body-hub" data-user-id="<?= htmlspecialchars(user_get_current_id() ?? '') ?>">
     <header class="topbar">
-        <div class="brand">Workout</div>
+        <div class="brand">Workout <span style="font-size:0.7em;color:#888;">v2026-02-14 <?= date('H:i:s') ?></span></div>
         <nav class="topnav">
             <?php if (auth_check()): ?>
                 <span class="user-indicator">👤 <?= htmlspecialchars(auth_current_user()['username']) ?></span>
-                <a href="index.php" class="active">Progress Hub</a>
-                <a href="session.php">Session Mode</a>
-                <a href="dashboard.php">Dashboard</a>
-                <a href="goals.php">Goals</a>
-                <a href="compare.php">Compare</a>
-                <a href="users.php">Users</a>
-                <a href="routines.php">Routines</a>
-                <a href="tracked_sets.php">Tracked Sets</a>
-                <a href="/auth/logout.php" class="logout-link">Logout</a>
+                <a href="index.php" class="active" title="See your overall progress and recent activity">Progress Hub</a>
+                <a href="session.php" title="Start and log a new workout session">Session Mode</a>
+                <a href="dashboard.php" title="View charts and stats for your workouts">Dashboard</a>
+                <a href="goals.php" title="Set and track your fitness goals">Goals</a>
+                <a href="compare.php" title="Compare progress between users">Compare</a>
+                <a href="users.php" title="Manage user profiles">Users</a>
+                <a href="routines.php" title="Create and edit workout routines">Routines</a>
+                <a href="tracked_sets.php" title="Browse all logged sets">Tracked Sets</a>
+                <a href="auth/logout.php" class="logout-link" title="Log out of your account">Logout</a>
             <?php else: ?>
                 <span class="user-indicator">Not logged in</span>
-                <a href="/auth/login.php" class="btn-small">Login</a>
-                <a href="/auth/register.php" class="btn-small">Register</a>
+                <a href="<?= $base_url ?>auth/login.php" class="btn-small">Login</a>
+                <a href="<?= $base_url ?>auth/register.php" class="btn-small">Register</a>
             <?php endif; ?>
         </nav>
     </header>

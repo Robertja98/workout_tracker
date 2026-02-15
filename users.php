@@ -104,14 +104,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php endforeach; ?>
                 </select>
             </div>
-            <a href="index.php">Progress Hub</a>
-            <a href="/session.php">Session Mode</a>
-            <a href="dashboard.php">Dashboard</a>
-            <a href="goals.php">Goals</a>
-            <a href="compare.php">Compare</a>
-            <a href="users.php" class="active">Users</a>
-            <a href="routines.php">Routines</a>
-            <a href="tracked_sets.php">Tracked Sets</a>
+            <?php
+            // Auto-detect base_url
+            $base_url = '';
+            if (file_exists(__DIR__ . '/auth/config.php')) {
+                $config = require __DIR__ . '/auth/config.php';
+                $base_url = $config['app']['base_url'] ?? '';
+            }
+            if (!$base_url) {
+                $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+                $host = $_SERVER['HTTP_HOST'] ?? '';
+                $script = $_SERVER['SCRIPT_NAME'] ?? '';
+                $dir = rtrim(str_replace('users.php', '', $script), '/');
+                $base_url = $dir ? $dir . '/' : '/';
+            }
+            ?>
+            <nav class="topnav">
+                    <a href="/Workout/index.php" title="See your overall progress and recent activity">Progress Hub</a>
+                    <a href="/Workout/session.php" title="Start and log a new workout session">Session Mode</a>
+                    <a href="/Workout/dashboard.php" title="View charts and stats for your workouts">Dashboard</a>
+                    <a href="/Workout/goals.php" title="Set and track your fitness goals">Goals</a>
+                    <a href="/Workout/compare.php" title="Compare progress between users">Compare</a>
+                    <a href="/Workout/users.php" class="active" title="Manage user profiles">Users</a>
+                    <a href="/Workout/routines.php" title="Create and edit workout routines">Routines</a>
+                    <a href="/Workout/tracked_sets.php" title="Browse all logged sets">Tracked Sets</a>
         </nav>
     </header>
 

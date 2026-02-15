@@ -146,6 +146,14 @@
                 if ($result['success']) {
                     // Redirect to main app
                     $redirectUrl = $_GET['redirect'] ?? '../index.php';
+                    // Sanitize: Only allow relative paths, limit length, and prevent open redirects
+                    if (!is_string($redirectUrl) || strlen($redirectUrl) > 256 || strpos($redirectUrl, '://') !== false || strpos($redirectUrl, '\\') !== false || strpos($redirectUrl, '..') === 0) {
+                        $redirectUrl = '../index.php';
+                    }
+                    // Only allow redirects within this app
+                    if (substr($redirectUrl, 0, 1) !== '/' && substr($redirectUrl, 0, 2) !== './' && substr($redirectUrl, 0, 3) !== '../') {
+                        $redirectUrl = '../index.php';
+                    }
                     header('Location: ' . $redirectUrl);
                     exit;
                 } else {

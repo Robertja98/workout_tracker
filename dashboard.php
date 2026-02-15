@@ -64,25 +64,40 @@ usort($historySessions, function ($a, $b) {
 <body class="body-hub" data-user-id="<?= htmlspecialchars(user_get_current_id() ?? '') ?>">
     <header class="topbar">
         <div class="brand">Workout</div>
+        <?php
+        // Auto-detect base_url
+        $base_url = '';
+        if (file_exists(__DIR__ . '/auth/config.php')) {
+            $config = require __DIR__ . '/auth/config.php';
+            $base_url = $config['app']['base_url'] ?? '';
+        }
+        if (!$base_url) {
+            $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+            $host = $_SERVER['HTTP_HOST'] ?? '';
+            $script = $_SERVER['SCRIPT_NAME'] ?? '';
+            $dir = rtrim(str_replace('dashboard.php', '', $script), '/');
+            $base_url = $dir ? $dir . '/' : '/';
+        }
+        ?>
         <nav class="topnav">
             <div class="user-switch">
                 <label class="user-switch-label" for="userSwitch">Active</label>
                 <select id="userSwitch" class="user-switch-select" data-user-switch>
                     <?php foreach ($activeUsers as $id => $user): ?>
-                        <option value="<?= htmlspecialchars($id) ?>" <?= $currentUser && ($currentUser['id'] ?? '') === $id ? 'selected' : '' ?>>
+                        <option value="<?= htmlspecialchars($id) ?>" <?= $currentUser && ($currentUser['id'] ?? '') === $id ? 'selected' : '' ?> >
                             <?= htmlspecialchars($user['name'] ?? 'User') ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
             </div>
-            <a href="index.php">Progress Hub</a>
-            <a href="/session.php">Session Mode</a>
-            <a href="dashboard.php" class="active">Dashboard</a>
-            <a href="goals.php">Goals</a>
-            <a href="compare.php">Compare</a>
-            <a href="users.php">Users</a>
-            <a href="routines.php">Routines</a>
-            <a href="tracked_sets.php">Tracked Sets</a>
+            <a href="<?= $base_url ?>index.php" title="See your overall progress and recent activity">Progress Hub</a>
+            <a href="<?= $base_url ?>session.php" title="Start and log a new workout session">Session Mode</a>
+            <a href="<?= $base_url ?>dashboard.php" class="active" title="View charts and stats for your workouts">Dashboard</a>
+            <a href="<?= $base_url ?>goals.php" title="Set and track your fitness goals">Goals</a>
+            <a href="<?= $base_url ?>compare.php" title="Compare progress between users">Compare</a>
+            <a href="<?= $base_url ?>users.php" title="Manage user profiles">Users</a>
+            <a href="<?= $base_url ?>routines.php" title="Create and edit workout routines">Routines</a>
+            <a href="<?= $base_url ?>tracked_sets.php" title="Browse all logged sets">Tracked Sets</a>
         </nav>
     </header>
 
