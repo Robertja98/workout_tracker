@@ -49,15 +49,6 @@ $exercises = file_exists($exercisesFile) ? json_decode(file_get_contents($exerci
             <a href="<?= $base_url ?>users.php" title="Manage user profiles">Users</a>
             <a href="<?= $base_url ?>routines.php" class="active" title="Create and edit workout routines">Routines</a>
             <a href="<?= $base_url ?>tracked_sets.php" title="Browse all logged sets">Tracked Sets</a>
-                <a class="user-indicator" href="/Workout/users.php">Active: <?= htmlspecialchars($currentUser['name'] ?? 'User') ?></a>
-                <a href="<?= $base_url ?>index.php" title="See your overall progress and recent activity">Progress Hub</a>
-                <a href="<?= $base_url ?>session.php" title="Start and log a new workout session">Session Mode</a>
-                <a href="<?= $base_url ?>dashboard.php" title="View charts and stats for your workouts">Dashboard</a>
-                <a href="<?= $base_url ?>goals.php" title="Set and track your fitness goals">Goals</a>
-                <a href="<?= $base_url ?>compare.php" title="Compare progress between users">Compare</a>
-                <a href="<?= $base_url ?>users.php" title="Manage user profiles">Users</a>
-                <a href="<?= $base_url ?>routines.php" class="active" title="Create and edit workout routines">Routines</a>
-                <a href="<?= $base_url ?>tracked_sets.php" title="Browse all logged sets">Tracked Sets</a>
         </nav>
     </header>
 
