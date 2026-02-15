@@ -29,7 +29,8 @@ if (!$auth->isAuthenticated()) {
     } else {
         $redirectPath = $currentUrl;
     }
-    $loginUrl = '/Workout/auth/login.php?redirect=' . urlencode($redirectPath);
+    $baseUrl = rtrim($config['app']['base_url'], '/');
+    $loginUrl = $baseUrl . '/auth/login.php?redirect=' . urlencode($redirectPath);
     header('Location: ' . $loginUrl);
     exit;
 }

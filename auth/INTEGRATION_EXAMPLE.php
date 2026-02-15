@@ -14,7 +14,8 @@ $auth = new Auth($authConfig);
 
 // Check if user is authenticated with the auth system
 if (!$auth->isAuthenticated()) {
-    header('Location: /Workout/auth/login.php?redirect=' . urlencode($_SERVER['REQUEST_URI']));
+    $baseUrl = rtrim($authConfig['app']['base_url'], '/');
+    header('Location: ' . $baseUrl . '/auth/login.php?redirect=' . urlencode($_SERVER['REQUEST_URI']));
     exit;
 }
 
