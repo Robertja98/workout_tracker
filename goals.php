@@ -422,14 +422,14 @@ $today = date('Y-m-d');
             <a href="<?= $base_url ?>index.php" title="See your overall progress and recent activity">Progress Hub</a>
             <a href="<?= $base_url ?>session.php" title="Start and log a new workout session">Session Mode</a>
             <a href="<?= $base_url ?>dashboard.php" title="View charts and stats for your workouts">Dashboard</a>
-                <a href="/Workout/index.php" title="See your overall progress and recent activity">Progress Hub</a>
-                <a href="/Workout/session.php" title="Start and log a new workout session">Session Mode</a>
-                <a href="/Workout/dashboard.php" title="View charts and stats for your workouts">Dashboard</a>
-                <a href="/Workout/goals.php" class="active" title="Set and track your fitness goals">Goals</a>
-                <a href="/Workout/compare.php" title="Compare progress between users">Compare</a>
-                <a href="/Workout/users.php" title="Manage user profiles">Users</a>
-                <a href="/Workout/routines.php" title="Create and edit workout routines">Routines</a>
-                <a href="/Workout/tracked_sets.php" title="Browse all logged sets">Tracked Sets</a>
+                <a href="<?= $base_url ?>index.php" title="See your overall progress and recent activity">Progress Hub</a>
+                <a href="<?= $base_url ?>session.php" title="Start and log a new workout session">Session Mode</a>
+                <a href="<?= $base_url ?>dashboard.php" title="View charts and stats for your workouts">Dashboard</a>
+                <a href="<?= $base_url ?>goals.php" class="active" title="Set and track your fitness goals">Goals</a>
+                <a href="<?= $base_url ?>compare.php" title="Compare progress between users">Compare</a>
+                <a href="<?= $base_url ?>users.php" title="Manage user profiles">Users</a>
+                <a href="<?= $base_url ?>routines.php" title="Create and edit workout routines">Routines</a>
+                <a href="<?= $base_url ?>tracked_sets.php" title="Browse all logged sets">Tracked Sets</a>
         </nav>
     </header>
 
