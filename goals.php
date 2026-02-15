@@ -440,22 +440,41 @@ $today = date('Y-m-d');
     <main class="page">
         <section class="panel" id="goalPsychPanel">
             <h2 style="color:#4bbf73;">Identify Your Why</h2>
-            <div id="motivationCloud" style="margin-bottom:1em; min-height: 60px;"></div>
+            <label for="goalSelect" style="font-size:1.05em;color:#2e8b57;margin-bottom:0.5em;display:block;">Select a goal focus:</label>
+            <select id="goalSelect" style="margin-bottom:1em;padding:0.4em 1em;border-radius:8px;border:1.5px solid #4bbf73;background:#e6f7ee;font-size:1.05em;">
+                <option value="Weight">Weight</option>
+                <option value="Strength">Strength</option>
+                <option value="Consistency">Consistency</option>
+                <option value="Wellbeing">Wellbeing</option>
+                <option value="Mindset">Mindset</option>
+                <option value="Other">Other</option>
+            </select>
+            <div id="motivationCloud" style="margin-bottom:1em; min-height: 60px; transition: opacity 0.5s, transform 0.5s;"></div>
             <form id="motivationForm" method="post" style="margin-bottom:1em;">
                 <input type="hidden" name="action" value="save_motivation">
                 <input type="hidden" id="selectedWordsInput" name="selected_words" value="">
+                <input type="hidden" id="selectedGoalInput" name="selected_goal" value="Weight">
                 <button class="btn btn-blue" type="submit">Save Today's Motivation</button>
                 <span id="motivationSavedMsg" style="color:#4bbf73;display:none;margin-left:1em;">Saved!</span>
             </form>
             <div id="motivationReflection" style="margin-bottom:1em;"></div>
             <div style="font-size:0.98em;color:#6b7a8a;margin-bottom:0.5em;">Tip: Connecting your goals to your values makes them more powerful. Select what resonates today!</div>
+            <style>
+            .motivation-word { transition: background 0.3s, color 0.3s, font-size 0.3s, opacity 0.5s, transform 0.5s; }
+            #motivationCloud.fade-out { opacity: 0; transform: scale(0.95); }
+            #motivationCloud.fade-in { opacity: 1; transform: scale(1); }
+            </style>
             <script>
             // Motivational words to float
-            const baseWords = [
-                'Strength', 'Energy', 'Confidence', 'Focus', 'Stress Relief', 'Discipline', 'Joy', 'Growth', 'Resilience', 'Health',
-                'Endurance', 'Balance', 'Achievement', 'Routine', 'Wellbeing', 'Empowerment', 'Challenge', 'Calm', 'Community', 'Fun',
-                'Self-care', 'Progress', 'Determination', 'Inspiration', 'Routine', 'Recovery', 'Mindfulness', 'Pride', 'Purpose', 'Vitality'
-            ];
+            // Goal-specific word banks
+            const goalWordBanks = {
+                'Weight': ['Progress', 'Discipline', 'Routine', 'Balance', 'Achievement', 'Health', 'Endurance', 'Self-care', 'Pride', 'Goal', 'Milestone', 'Dedication', 'Patience', 'Change', 'Consistency', 'Focus', 'Energy', 'Wellbeing', 'Recovery', 'Routine'],
+                'Strength': ['Strength', 'Power', 'Growth', 'Resilience', 'Challenge', 'Empowerment', 'Confidence', 'Determination', 'Achievement', 'Endurance', 'Progress', 'Lift', 'Push', 'Drive', 'Effort', 'Grit', 'Stamina', 'Pride', 'Goal', 'Milestone'],
+                'Consistency': ['Routine', 'Habit', 'Discipline', 'Focus', 'Commitment', 'Progress', 'Streak', 'Persistence', 'Dedication', 'Balance', 'Patience', 'Momentum', 'Goal', 'Milestone', 'Self-care', 'Wellbeing', 'Energy', 'Growth', 'Calm', 'Joy'],
+                'Wellbeing': ['Wellbeing', 'Calm', 'Joy', 'Fun', 'Community', 'Self-care', 'Balance', 'Mindfulness', 'Recovery', 'Health', 'Energy', 'Happiness', 'Peace', 'Relax', 'Gratitude', 'Purpose', 'Support', 'Growth', 'Pride', 'Vitality'],
+                'Mindset': ['Mindset', 'Focus', 'Inspiration', 'Motivation', 'Confidence', 'Resilience', 'Growth', 'Challenge', 'Calm', 'Joy', 'Purpose', 'Determination', 'Patience', 'Empowerment', 'Pride', 'Routine', 'Balance', 'Self-care', 'Progress', 'Goal'],
+                'Other': ['Strength', 'Energy', 'Confidence', 'Focus', 'Stress Relief', 'Discipline', 'Joy', 'Growth', 'Resilience', 'Health', 'Endurance', 'Balance', 'Achievement', 'Routine', 'Wellbeing', 'Empowerment', 'Challenge', 'Calm', 'Community', 'Fun', 'Self-care', 'Progress', 'Determination', 'Inspiration', 'Routine', 'Recovery', 'Mindfulness', 'Pride', 'Purpose', 'Vitality']
+            };
             // Color palette for variety
             const colorPalette = [
                 '#4bbf73', '#2e8b57', '#ffb700', '#4f8cff', '#ff6f61', '#6b7a8a', '#e6f7ee', '#ffd166', '#b388ff', '#ffb4a2', '#a3c9a8', '#f7b801'
@@ -470,18 +489,34 @@ $today = date('Y-m-d');
                 }
                 return arr;
             }
-            // Generate a random cloud (allow repeats, random order, size, color)
-            function getRandomCloudWords(count = 18) {
+            // Generate a random cloud for a goal (allow repeats, random order, size, color)
+            function getRandomCloudWords(goal, count = 18) {
+                const bank = goalWordBanks[goal] || goalWordBanks['Other'];
                 let words = [];
                 for (let i = 0; i < count; i++) {
-                    words.push(baseWords[Math.floor(Math.random() * baseWords.length)]);
+                    words.push(bank[Math.floor(Math.random() * bank.length)]);
                 }
                 return shuffle(words);
             }
             const cloud = document.getElementById('motivationCloud');
             const selected = new Set();
-            let currentCloudWords = getRandomCloudWords();
-            function renderCloud() {
+            let currentGoal = 'Weight';
+            let currentCloudWords = getRandomCloudWords(currentGoal);
+            function renderCloud(animate = false) {
+                if (animate) {
+                    cloud.classList.remove('fade-in');
+                    cloud.classList.add('fade-out');
+                    setTimeout(() => {
+                        _renderCloudInner();
+                        cloud.classList.remove('fade-out');
+                        cloud.classList.add('fade-in');
+                    }, 350);
+                } else {
+                    _renderCloudInner();
+                    cloud.classList.add('fade-in');
+                }
+            }
+            function _renderCloudInner() {
                 cloud.innerHTML = '';
                 currentCloudWords.forEach(word => {
                     const span = document.createElement('span');
@@ -508,6 +543,13 @@ $today = date('Y-m-d');
                 });
             }
             renderCloud();
+            document.getElementById('goalSelect').onchange = function(e) {
+                currentGoal = e.target.value;
+                document.getElementById('selectedGoalInput').value = currentGoal;
+                selected.clear();
+                currentCloudWords = getRandomCloudWords(currentGoal);
+                renderCloud(true);
+            };
             document.getElementById('motivationForm').onsubmit = function(e) {
                 if (selected.size === 0) {
                     alert('Please select at least one word that motivates you today.');
@@ -515,6 +557,7 @@ $today = date('Y-m-d');
                     return false;
                 }
                 document.getElementById('selectedWordsInput').value = Array.from(selected).join(',');
+                document.getElementById('selectedGoalInput').value = currentGoal;
             };
             </script>
         </section>
