@@ -37,6 +37,7 @@ $routines = is_array($routines) ? $routines : [];
         }
         ?>
         <nav class="topnav">
+            <div style="color:red;font-size:0.9em;">[DEBUG] base_url: <?= htmlspecialchars($base_url) ?></div>
             <div class="user-switch">
                 <label class="user-switch-label" for="userSwitch">Active</label>
                 <select id="userSwitch" class="user-switch-select" data-user-switch>
