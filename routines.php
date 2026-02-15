@@ -26,6 +26,10 @@ $exercises = file_exists($exercisesFile) ? json_decode(file_get_contents($exerci
         if (file_exists(__DIR__ . '/auth/config.php')) {
             $config = require __DIR__ . '/auth/config.php';
             $base_url = $config['app']['base_url'] ?? '';
+                    // Ensure base_url ends with a single slash
+                    if ($base_url && substr($base_url, -1) !== '/') {
+                        $base_url .= '/';
+                    }
         }
         if (!$base_url) {
             $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
