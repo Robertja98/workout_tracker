@@ -450,11 +450,13 @@ $today = date('Y-m-d');
                 <option value="Other">Other</option>
             </select>
             <div id="motivationCloud" style="margin-bottom:1em; min-height: 60px; transition: opacity 0.5s, transform 0.5s;"></div>
+            <div id="motivationStatic" style="margin-bottom:1em; display:none;"></div>
             <form id="motivationForm" method="post" style="margin-bottom:1em;">
                 <input type="hidden" name="action" value="save_motivation">
                 <input type="hidden" id="selectedWordsInput" name="selected_words" value="">
                 <input type="hidden" id="selectedGoalInput" name="selected_goal" value="Weight">
                 <button class="btn btn-blue" type="submit">Save Today's Motivation</button>
+                <button id="changeMotivationBtn" type="button" class="btn btn-small" style="margin-left:1em;display:none;">Change</button>
                 <span id="motivationSavedMsg" style="color:#4bbf73;display:none;margin-left:1em;">Saved!</span>
             </form>
             <div id="motivationReflection" style="margin-bottom:1em;"></div>
@@ -463,6 +465,7 @@ $today = date('Y-m-d');
             .motivation-word { transition: background 0.3s, color 0.3s, font-size 0.3s, opacity 0.5s, transform 0.5s; }
             #motivationCloud.fade-out { opacity: 0; transform: scale(0.95); }
             #motivationCloud.fade-in { opacity: 1; transform: scale(1); }
+            .motivation-static-pill { display:inline-block; background:#4bbf73; color:#fff; font-size:2em; font-weight:bold; border-radius:18px; padding:0.4em 1.2em; margin:0.5em 0; box-shadow:0 2px 8px #4bbf7322; letter-spacing:0.02em; }
             </style>
             <script>
             // Motivational words to float
@@ -499,10 +502,27 @@ $today = date('Y-m-d');
                 return shuffle(words);
             }
             const cloud = document.getElementById('motivationCloud');
+            const staticDiv = document.getElementById('motivationStatic');
             const selected = new Set();
             let currentGoal = 'Weight';
             let currentCloudWords = getRandomCloudWords(currentGoal);
+            let staticMotivation = null;
+            let cloudInterval = null;
             function renderCloud(animate = false) {
+                if (staticMotivation) {
+                    cloud.style.display = 'none';
+                    staticDiv.style.display = '';
+                    staticDiv.innerHTML = `<span class='motivation-static-pill'>${staticMotivation}</span>`;
+                    document.getElementById('selectedWordsInput').value = staticMotivation;
+                    document.getElementById('changeMotivationBtn').style.display = '';
+                    document.getElementById('goalSelect').disabled = true;
+                    return;
+                } else {
+                    cloud.style.display = '';
+                    staticDiv.style.display = 'none';
+                    document.getElementById('changeMotivationBtn').style.display = 'none';
+                    document.getElementById('goalSelect').disabled = false;
+                }
                 if (animate) {
                     cloud.classList.remove('fade-in');
                     cloud.classList.add('fade-out');
@@ -521,7 +541,7 @@ $today = date('Y-m-d');
                 currentCloudWords.forEach(word => {
                     const span = document.createElement('span');
                     span.textContent = word;
-                    span.className = 'motivation-word' + (selected.has(word) ? ' selected' : '');
+                    span.className = 'motivation-word';
                     span.style.margin = '0.3em';
                     span.style.display = 'inline-block';
                     span.style.padding = '0.3em 0.7em';
@@ -529,34 +549,51 @@ $today = date('Y-m-d');
                     // Random color and size
                     const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
                     const fontSize = fontSizes[Math.floor(Math.random() * fontSizes.length)];
-                    span.style.background = selected.has(word) ? '#4bbf73' : color;
-                    span.style.color = selected.has(word) ? '#fff' : '#222';
-                    span.style.fontWeight = selected.has(word) ? 'bold' : 'normal';
+                    span.style.background = color;
+                    span.style.color = '#222';
+                    span.style.fontWeight = 'normal';
                     span.style.fontSize = fontSize + 'px';
                     span.style.cursor = 'pointer';
                     span.onclick = () => {
-                        if (selected.has(word)) selected.delete(word); else selected.add(word);
+                        staticMotivation = word;
+                        clearInterval(cloudInterval);
                         renderCloud();
-                        document.getElementById('selectedWordsInput').value = Array.from(selected).join(',');
                     };
                     cloud.appendChild(span);
                 });
             }
+            function startCloudRandomizer() {
+                if (cloudInterval) clearInterval(cloudInterval);
+                cloudInterval = setInterval(() => {
+                    if (!staticMotivation) {
+                        currentCloudWords = getRandomCloudWords(currentGoal);
+                        renderCloud(true);
+                    }
+                }, 2000);
+            }
             renderCloud();
+            startCloudRandomizer();
             document.getElementById('goalSelect').onchange = function(e) {
                 currentGoal = e.target.value;
                 document.getElementById('selectedGoalInput').value = currentGoal;
-                selected.clear();
+                staticMotivation = null;
                 currentCloudWords = getRandomCloudWords(currentGoal);
                 renderCloud(true);
+                startCloudRandomizer();
+            };
+            document.getElementById('changeMotivationBtn').onclick = function() {
+                staticMotivation = null;
+                currentCloudWords = getRandomCloudWords(currentGoal);
+                renderCloud(true);
+                startCloudRandomizer();
             };
             document.getElementById('motivationForm').onsubmit = function(e) {
-                if (selected.size === 0) {
-                    alert('Please select at least one word that motivates you today.');
+                if (!staticMotivation) {
+                    alert('Please select a word that motivates you today.');
                     e.preventDefault();
                     return false;
                 }
-                document.getElementById('selectedWordsInput').value = Array.from(selected).join(',');
+                document.getElementById('selectedWordsInput').value = staticMotivation;
                 document.getElementById('selectedGoalInput').value = currentGoal;
             };
             </script>
