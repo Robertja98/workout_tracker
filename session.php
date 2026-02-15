@@ -182,6 +182,7 @@ $routines = is_array($routines) ? $routines : [];
 
     <script src="collapsible.js"></script>
     <script src="user_tab.js"></script>
+    <script src="MotivationPopup.js"></script>
     <script>
     // Dark mode toggle
     const darkModeBtn = document.getElementById('darkModeToggle');
