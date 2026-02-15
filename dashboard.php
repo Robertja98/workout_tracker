@@ -63,6 +63,7 @@ usort($historySessions, function ($a, $b) {
 </head>
 <body class="body-hub" data-user-id="<?= htmlspecialchars(user_get_current_id() ?? '') ?>">
     <header class="topbar">
+        <button id="darkModeToggle" class="btn btn-small" style="float:right;margin:0.5em 1em 0 0;">🌙 Dark Mode</button>
         <div class="brand">Workout</div>
         <?php
         // Auto-detect base_url
@@ -102,6 +103,20 @@ usort($historySessions, function ($a, $b) {
     </header>
 
     <main class="page">
+        <section class="panel" id="bestsStreaksPanel">
+            <h2>Personal Bests & Streaks</h2>
+            <div id="bestsStreaksContent" style="display:flex;gap:2em;flex-wrap:wrap;align-items:center;"></div>
+        </section>
+        <section class="panel" id="exportPanel">
+            <h2>Export / Share Progress</h2>
+            <button id="exportCsvBtn" class="btn btn-blue">Export CSV</button>
+            <button id="exportJsonBtn" class="btn btn-green">Export JSON</button>
+            <span id="exportStatus" style="margin-left:1em;color:#388e3c;"></span>
+        </section>
+        <section class="panel" id="reflectionsPanel">
+            <h2>Session Reflections</h2>
+            <div id="reflectionsContent" style="max-width:600px;"></div>
+        </section>
         <section class="hero compact">
             <div>
                 <p class="eyebrow">Insights</p>
@@ -367,19 +382,134 @@ usort($historySessions, function ($a, $b) {
                     </summary>
                     <div class="collapsible-body">
                         <div class="chart-container">
-                            <canvas id="topExercisesChart"></canvas>
+                            <canvas id="setsPerWeekChart"></canvas>
                         </div>
                         <div class="chart-container">
-                            <canvas id="weightChart"></canvas>
+                            <canvas id="volumePerWeekChart"></canvas>
                         </div>
                         <div class="chart-container">
-                            <canvas id="effortChart"></canvas>
+                            <canvas id="avgEffortChart"></canvas>
                         </div>
                     </div>
                 </details>
             </section>
         <?php endif; ?>
 
+    <script>
+    // Display personal bests and streaks from localStorage
+    function formatDuration(seconds) {
+        const min = Math.floor(seconds/60), sec = seconds%60;
+        return `${min}m ${sec}s`;
+    }
+    function showBestsAndStreaks() {
+        const bests = JSON.parse(localStorage.getItem('personalBests')||'{}');
+        const streak = JSON.parse(localStorage.getItem('workoutStreak')||'{}');
+        let html = '';
+        html += `<div><strong>Most Sets:</strong> ${bests.sets||'—'}</div>`;
+        html += `<div><strong>Highest Volume:</strong> ${bests.volume||'—'}</div>`;
+        html += `<div><strong>Longest Session:</strong> ${bests.duration ? formatDuration(bests.duration) : '—'}</div>`;
+        html += `<div><strong>Current Streak:</strong> ${streak.count||0} day${streak.count==1?'':'s'}</div>`;
+        document.getElementById('bestsStreaksContent').innerHTML = html;
+    }
+    showBestsAndStreaks();
+    // Show session reflections
+    function showReflections() {
+        let reflections = [];
+        try { reflections = JSON.parse(localStorage.getItem('sessionReflections')||'[]'); } catch(e) {}
+        let html = '';
+        if (!reflections.length) html = '<p class="muted">No reflections yet.</p>';
+        else html = '<ul style="padding-left:1.2em;">' + reflections.slice(-10).reverse().map(r => `<li><b>${r.date.slice(0,10)}</b>: ${r.text.replace(/</g,'&lt;')}</li>`).join('') + '</ul>';
+        document.getElementById('reflectionsContent').innerHTML = html;
+    }
+    showReflections();
+    // Progress Graphs
+    function groupByWeek(data, valueFn) {
+        const weekMap = {};
+        data.forEach(entry => {
+            const d = normalizeTime(entry);
+            if (!d) return;
+            // Get ISO week string
+            const y = d.getFullYear();
+            const onejan = new Date(d.getFullYear(),0,1);
+            const week = Math.ceil((((d - onejan) / 86400000) + onejan.getDay()+1)/7);
+            const key = `${y}-W${week.toString().padStart(2,'0')}`;
+            if (!weekMap[key]) weekMap[key] = [];
+            weekMap[key].push(entry);
+        });
+        // Sort by week
+        const sorted = Object.entries(weekMap).sort(([a], [b]) => a.localeCompare(b));
+        return sorted.map(([week, entries]) => ({week, value: valueFn(entries)}));
+    }
+
+    function renderProgressCharts() {
+        // Sets per week
+        const setsData = groupByWeek(progressData, entries => entries.length);
+        const setsLabels = setsData.map(d => d.week);
+        const setsCounts = setsData.map(d => d.value);
+        new Chart(document.getElementById('setsPerWeekChart').getContext('2d'), {
+            type: 'bar',
+            data: { labels: setsLabels, datasets: [{ label: 'Sets per Week', data: setsCounts, backgroundColor: '#2196f3' }] },
+            options: { plugins: { legend: { display: false } } }
+        });
+        // Volume per week
+        const volumeData = groupByWeek(progressData, entries => entries.reduce((sum,e) => sum + (parseFloat(e.weight||0)*parseInt(e.reps||0)||0),0));
+        const volumeLabels = volumeData.map(d => d.week);
+        const volumeCounts = volumeData.map(d => d.value);
+        new Chart(document.getElementById('volumePerWeekChart').getContext('2d'), {
+            type: 'bar',
+            data: { labels: volumeLabels, datasets: [{ label: 'Volume per Week', data: volumeCounts, backgroundColor: '#4caf50' }] },
+            options: { plugins: { legend: { display: false } } }
+        });
+        // Average effort per week
+        const effortData = groupByWeek(progressData, entries => {
+            const efforts = entries.map(e => parseInt(e.effort||0)).filter(Boolean);
+            return efforts.length ? (efforts.reduce((a,b)=>a+b,0)/efforts.length).toFixed(2) : 0;
+        });
+        const effortLabels = effortData.map(d => d.week);
+        const effortCounts = effortData.map(d => d.value);
+        new Chart(document.getElementById('avgEffortChart').getContext('2d'), {
+            type: 'line',
+            data: { labels: effortLabels, datasets: [{ label: 'Avg Effort', data: effortCounts, borderColor: '#ff9800', backgroundColor: 'rgba(255,152,0,0.1)', fill: true }] },
+            options: { plugins: { legend: { display: false } } }
+        });
+    }
+    if (window.Chart) renderProgressCharts();
+    // Dark mode toggle
+    const darkModeBtn = document.getElementById('darkModeToggle');
+    function setDarkMode(on) {
+        document.body.classList.toggle('dark-mode', on);
+        localStorage.setItem('darkMode', on ? '1' : '0');
+        darkModeBtn.textContent = on ? '☀️ Light Mode' : '🌙 Dark Mode';
+    }
+    darkModeBtn.onclick = () => setDarkMode(!document.body.classList.contains('dark-mode'));
+    if (localStorage.getItem('darkMode') === '1') setDarkMode(true);
+
+    // Export/share logic
+    function downloadFile(filename, content, type) {
+        const blob = new Blob([content], {type});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+    }
+    document.getElementById('exportCsvBtn').onclick = function() {
+        let rows = [Object.keys(progressData[0]||{}).join(',')];
+        for (let row of progressData) {
+            rows.push(Object.values(row).map(v => '"'+String(v).replace(/"/g,'""')+'"').join(','));
+        }
+        downloadFile('workout_progress.csv', rows.join('\n'), 'text/csv');
+        document.getElementById('exportStatus').textContent = 'CSV downloaded!';
+        setTimeout(()=>{document.getElementById('exportStatus').textContent='';},2000);
+    };
+    document.getElementById('exportJsonBtn').onclick = function() {
+        downloadFile('workout_progress.json', JSON.stringify(progressData,null,2), 'application/json');
+        document.getElementById('exportStatus').textContent = 'JSON downloaded!';
+        setTimeout(()=>{document.getElementById('exportStatus').textContent='';},2000);
+    };
+    </script>
     </main>
 
 <script>

@@ -1,0 +1,24 @@
+[
+    {
+        "id": "sess_1771122981762_pna1",
+        "routineId": "1",
+        "routineName": "Full Body Routine",
+        "startTime": "2026-02-15T02:36:21.762Z",
+        "endTime": "2026-02-15T02:36:35.317Z",
+        "duration": 14,
+        "totalSets": 3,
+        "totalVolume": 0,
+        "notes": ""
+    },
+    {
+        "id": "sess_1771123248532_zl0p",
+        "routineId": "1",
+        "routineName": "Full Body Routine",
+        "startTime": "2026-02-15T02:40:48.532Z",
+        "endTime": "2026-02-15T02:41:10.375Z",
+        "duration": 22,
+        "totalSets": 6,
+        "totalVolume": 0,
+        "notes": ""
+    }
+]

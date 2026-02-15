@@ -19,6 +19,7 @@ $routines = is_array($routines) ? $routines : [];
 </head>
 <body class="body-session" data-user-id="<?= htmlspecialchars(user_get_current_id() ?? '') ?>">
     <header class="topbar">
+        <button id="darkModeToggle" class="btn btn-small" style="float:right;margin:0.5em 1em 0 0;">🌙 Dark Mode</button>
         <div class="brand">Workout</div>
         <?php
         // Auto-detect base_url
@@ -62,6 +63,7 @@ $routines = is_array($routines) ? $routines : [];
         <div id="sessionEndPopup" class="popup" style="display:none;position:fixed;z-index:1000;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;">
             <div style="background:#fff;padding:2em 2.5em;border-radius:1em;max-width:95vw;width:400px;text-align:center;box-shadow:0 8px 32px #0002;position:relative;">
                 <button id="closeSessionEndPopup" style="position:absolute;top:0.5em;right:0.5em;background:none;border:none;font-size:1.5em;cursor:pointer;">&times;</button>
+                <div id="popupBadges" style="margin-bottom:1em;"></div>
                 <h2 id="popupEncouragement">Awesome!</h2>
                 <div id="popupSummary" style="margin:1em 0;"></div>
                 <div id="popupComparison" style="color:#555;font-size:1em;"></div>
@@ -96,6 +98,8 @@ $routines = is_array($routines) ? $routines : [];
                 </label>
                 <div class="btn-row">
                     <button id="newDraftBtn" class="btn btn-blue" type="button">New Draft</button>
+                    <button id="suggestRoutineBtn" class="btn btn-orange" type="button">Suggest Routine</button>
+                    <button id="randomRoutineBtn" class="btn btn-purple" type="button">Random Routine</button>
                     <button id="startSessionBtn" class="btn btn-green">Start Session</button>
                     <button id="endSessionBtn" class="btn btn-red" disabled>End Session</button>
                 </div>
@@ -175,6 +179,40 @@ $routines = is_array($routines) ? $routines : [];
     <script src="collapsible.js"></script>
     <script src="user_tab.js"></script>
     <script>
+    // Dark mode toggle
+    const darkModeBtn = document.getElementById('darkModeToggle');
+    function setDarkMode(on) {
+        document.body.classList.toggle('dark-mode', on);
+        localStorage.setItem('darkMode', on ? '1' : '0');
+        darkModeBtn.textContent = on ? '☀️ Light Mode' : '🌙 Dark Mode';
+    }
+    darkModeBtn.onclick = () => setDarkMode(!document.body.classList.contains('dark-mode'));
+    if (localStorage.getItem('darkMode') === '1') setDarkMode(true);
+    // Routine suggestion/random logic
+    document.getElementById('suggestRoutineBtn').onclick = function() {
+        // Find least-used routine from localStorage sessionHistory
+        let sessionHistory = [];
+        try { sessionHistory = JSON.parse(localStorage.getItem('sessionHistory')||'[]'); } catch(e) {}
+        let routineCounts = {};
+        for (let id in routines) routineCounts[id] = 0;
+        sessionHistory.forEach(s => {
+            if (s.routineId && routineCounts.hasOwnProperty(s.routineId)) routineCounts[s.routineId]++;
+        });
+        let leastUsed = Object.entries(routineCounts).sort((a,b)=>a[1]-b[1])[0];
+        if (leastUsed) {
+            routineSelect.value = leastUsed[0];
+            alert('Suggested routine: ' + (routines[leastUsed[0]].name||'Routine'));
+        } else {
+            alert('No routines found.');
+        }
+    };
+    document.getElementById('randomRoutineBtn').onclick = function() {
+        let keys = Object.keys(routines);
+        if (!keys.length) { alert('No routines found.'); return; }
+        let pick = keys[Math.floor(Math.random()*keys.length)];
+        routineSelect.value = pick;
+        alert('Random routine: ' + (routines[pick].name||'Routine'));
+    };
         const routines = <?php echo json_encode($routines, JSON_PRETTY_PRINT); ?>;
 
         const sessionDraftSelect = document.getElementById('sessionDraftSelect');
@@ -776,11 +814,53 @@ $routines = is_array($routines) ? $routines : [];
             "You’re one workout closer to your goal!"
         ];
 
-        function showSessionEndPopup(summary, comparison) {
+        function showSessionEndPopup(summary, comparison, badgesHtml) {
             document.getElementById('popupEncouragement').textContent = encouragements[Math.floor(Math.random()*encouragements.length)];
             document.getElementById('popupSummary').innerHTML = summary;
             document.getElementById('popupComparison').textContent = comparison;
             document.getElementById('popupQuote').textContent = funQuotes[Math.floor(Math.random()*funQuotes.length)];
+            document.getElementById('popupBadges').innerHTML = badgesHtml || '';
+
+            // Goal reminder logic (simple, localStorage-based)
+            let reminderHtml = '';
+            try {
+                // Get session goal from localStorage (set by user on goals page)
+                let goals = JSON.parse(localStorage.getItem('userGoals')||'{}');
+                let sessionsPerWeek = goals.frequency && goals.frequency.sessionsPerWeek ? parseInt(goals.frequency.sessionsPerWeek) : null;
+                if (sessionsPerWeek) {
+                    // Count sessions this week
+                    let sessions = JSON.parse(localStorage.getItem('sessionHistory')||'[]');
+                    let now = new Date();
+                    let weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+                    let count = sessions.filter(s => {
+                        let d = new Date(s.endTime||s.startTime);
+                        return d >= weekStart && d <= now;
+                    }).length;
+                    if (count < sessionsPerWeek) {
+                        reminderHtml = `<div style='margin:1em 0 0 0;color:#e65100;font-weight:bold;'>Only ${sessionsPerWeek-count} session${sessionsPerWeek-count===1?'':'s'} left to hit your weekly goal!</div>`;
+                    } else {
+                        reminderHtml = `<div style='margin:1em 0 0 0;color:#388e3c;font-weight:bold;'>You hit your weekly session goal!</div>`;
+                    }
+                }
+            } catch(e) {}
+
+            // Add session reflection prompt
+            let reflectionHtml = `<div style='margin-top:1em;'>`
+                + `<label for='sessionReflection'><b>How did you feel?</b></label><br>`
+                + `<textarea id='sessionReflection' rows='2' style='width:90%;margin-top:0.5em;' placeholder='Quick reflection, PRs, tweaks, etc.'></textarea>`
+                + `<button id='saveReflectionBtn' class='btn btn-blue' style='margin-top:0.5em;'>Save Reflection</button>`
+                + `<div id='reflectionSavedMsg' style='color:green;display:none;margin-top:0.5em;'>Saved!</div>`
+                + `</div>`;
+            document.getElementById('popupSummary').insertAdjacentHTML('afterend', reminderHtml + reflectionHtml);
+            document.getElementById('saveReflectionBtn').onclick = function() {
+                let val = document.getElementById('sessionReflection').value.trim();
+                if (val) {
+                    let reflections = JSON.parse(localStorage.getItem('sessionReflections')||'[]');
+                    reflections.push({date: (new Date()).toISOString(), text: val});
+                    localStorage.setItem('sessionReflections', JSON.stringify(reflections));
+                    document.getElementById('reflectionSavedMsg').style.display = 'block';
+                }
+            };
             document.getElementById('sessionEndPopup').style.display = 'flex';
         }
         document.getElementById('closeSessionEndPopup').onclick = function() {
@@ -818,6 +898,42 @@ $routines = is_array($routines) ? $routines : [];
             let min = Math.floor(duration/60), sec = duration%60;
             let summary = `<b>${sets}</b> sets, <b>${volume}</b> total volume<br>in <b>${min}m ${sec}s</b>`;
 
+            // Personal bests and streaks
+            let bests = JSON.parse(localStorage.getItem('personalBests')||'{}');
+            let streak = JSON.parse(localStorage.getItem('workoutStreak')||'{}');
+            let today = (new Date()).toISOString().slice(0,10);
+            let badges = [];
+            // Personal bests
+            if (!bests.sets || sets > bests.sets) {
+                bests.sets = sets;
+                badges.push('<span class="badge" style="background:#ffd700;color:#222;padding:0.3em 0.7em;border-radius:1em;margin:0 0.2em;">New Most Sets!</span>');
+            }
+            if (!bests.volume || volume > bests.volume) {
+                bests.volume = volume;
+                badges.push('<span class="badge" style="background:#ff9800;color:#fff;padding:0.3em 0.7em;border-radius:1em;margin:0 0.2em;">New Volume Record!</span>');
+            }
+            if (!bests.duration || duration > bests.duration) {
+                bests.duration = duration;
+                badges.push('<span class="badge" style="background:#2196f3;color:#fff;padding:0.3em 0.7em;border-radius:1em;margin:0 0.2em;">Longest Session!</span>');
+            }
+            localStorage.setItem('personalBests', JSON.stringify(bests));
+
+            // Streaks
+            let lastDay = streak.lastDay || null;
+            let count = streak.count || 0;
+            if (lastDay === today) {
+                // Already logged today
+            } else if (lastDay && ((new Date(today) - new Date(lastDay)) === 86400000)) {
+                count += 1;
+                badges.push(`<span class="badge" style="background:#4caf50;color:#fff;padding:0.3em 0.7em;border-radius:1em;margin:0 0.2em;">${count} Day Streak!</span>`);
+            } else {
+                count = 1;
+                if (lastDay) badges.push('<span class="badge" style="background:#607d8b;color:#fff;padding:0.3em 0.7em;border-radius:1em;margin:0 0.2em;">Streak Reset</span>');
+            }
+            streak.lastDay = today;
+            streak.count = count;
+            localStorage.setItem('workoutStreak', JSON.stringify(streak));
+
             // Compare to last session (if available)
             let comparison = '';
             try {
@@ -842,7 +958,7 @@ $routines = is_array($routines) ? $routines : [];
             // Save session, then show popup after save
             suppressSessionSavedAlert = true;
             handleSaveSession(true).then(() => {
-                showSessionEndPopup(summary, comparison);
+                showSessionEndPopup(summary, comparison, badges.join(' '));
                 suppressSessionSavedAlert = false;
             });
         });

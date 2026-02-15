@@ -389,6 +389,10 @@ $today = date('Y-m-d');
 <body class="body-hub" data-user-id="<?= htmlspecialchars(user_get_current_id() ?? '') ?>">
     <header class="topbar">
         <div class="brand">Workout</div>
+        <div class="welcome-banner" style="background:linear-gradient(90deg,#e6f7ee 60%,#fff7e6 100%);border-radius:18px;padding:18px 24px;margin:18px 0 0 0;box-shadow:0 2px 12px #ffd16622;">
+            <h2 style="margin:0 0 6px 0;font-size:1.5em;color:#2e8b57;">Welcome back<?= $currentUser && !empty($currentUser['name']) ? ', ' . htmlspecialchars($currentUser['name']) : '' ?>!</h2>
+            <div style="font-size:1.1em;color:#4bbf73;">Let’s build your best self. Your goals are about <b>you</b>—set intentions that excite and inspire.</div>
+        </div>
         <?php
         // Auto-detect base_url
         $base_url = '';
@@ -430,11 +434,27 @@ $today = date('Y-m-d');
     </header>
 
     <main class="page">
+        <section class="panel" id="goalPsychPanel">
+            <h2 style="color:#4bbf73;">Identify Your Why</h2>
+            <form id="whyForm" style="margin-bottom:1em;">
+                <label for="whyInput" style="font-size:1.1em;color:#2e8b57;"><b>What motivates you to work out?</b></label><br>
+                <input id="whyInput" name="why" type="text" style="width:90%;margin:0.5em 0;border:2px solid #4bbf73;background:#e6f7ee;" maxlength="120" placeholder="E.g. Feel stronger, reduce stress, be a role model...">
+                <button class="btn btn-blue" type="submit">Save Motivation</button>
+                <span id="whySavedMsg" style="color:#4bbf73;display:none;margin-left:1em;">Saved!</span>
+            </form>
+            <div id="whyDisplay" style="margin-bottom:1em;"></div>
+                    <div style="font-size:0.98em;color:#6b7a8a;margin-bottom:0.5em;">Tip: Connecting your goals to your values makes them more powerful.</div>
+        </section>
+        <section class="panel" id="suggestionPanel">
+            <h2 style="display:inline;color:#4f8cff;">Need a Nudge?</h2>
+            <button id="toggleSuggestBtn" class="btn btn-small" style="margin-left:1em;background:#e3f0ff;color:#4f8cff;">Show</button>
+            <div id="suggestionContent" style="display:none;margin-top:1em;"></div>
+        </section>
         <section class="hero">
             <div>
-                <p class="eyebrow">Targets & trends</p>
-                <h1>Goals</h1>
-                <p class="lede">Set your targets and track progress across weight, strength, and consistency.</p>
+                <p class="eyebrow">Targets & Trends</p>
+                <h1 style="color:#2e8b57;">Your Goals</h1>
+                <p class="lede">Set your targets and track progress across weight, strength, and consistency. Every step counts—celebrate your wins!</p>
             </div>
             <div class="hero-actions">
                 <a class="btn btn-green" href="/session.php">Start Session</a>
@@ -445,8 +465,8 @@ $today = date('Y-m-d');
         <?php if ($goalHit): ?>
             <div class="celebrate-banner">
                 <div>
-                    <h3>Goal Hit</h3>
-                    <p class="muted">You have reached at least one target. Keep the momentum going.</p>
+                    <h3 style="color:#ffb700;">🎉 Goal Achieved!</h3>
+                    <p class="affirm">You’ve reached a target—amazing work! Keep the momentum going and celebrate your progress.</p>
                 </div>
                 <span class="badge">Milestone</span>
             </div>
@@ -993,7 +1013,56 @@ $today = date('Y-m-d');
 <script src="collapsible.js"></script>
 <script src="user_tab.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
+    <script>
+    // Psychological goal prompt
+    function loadWhy() {
+        let why = localStorage.getItem('userWhy')||'';
+        if (why) document.getElementById('whyDisplay').innerHTML = `<b>Your motivation:</b> "${why.replace(/</g,'&lt;')}"`;
+        else document.getElementById('whyDisplay').innerHTML = '';
+    }
+    document.getElementById('whyForm').onsubmit = function(e) {
+        e.preventDefault();
+        let val = document.getElementById('whyInput').value.trim();
+        if (val) {
+            localStorage.setItem('userWhy', val);
+            document.getElementById('whySavedMsg').style.display = 'inline';
+            loadWhy();
+            setTimeout(()=>{document.getElementById('whySavedMsg').style.display='none';},2000);
+        }
+    };
+    loadWhy();
+
+    // Gentle suggestions logic
+    const suggestionBtn = document.getElementById('toggleSuggestBtn');
+    const suggestionContent = document.getElementById('suggestionContent');
+    let suggestionsVisible = false;
+    suggestionBtn.onclick = function() {
+        suggestionsVisible = !suggestionsVisible;
+        suggestionContent.style.display = suggestionsVisible ? 'block' : 'none';
+        suggestionBtn.textContent = suggestionsVisible ? 'Hide' : 'Show';
+        if (suggestionsVisible) showSuggestions();
+    };
+    function showSuggestions() {
+        // Analyze progress for gentle suggestions
+        let progress = [];
+        try { progress = JSON.parse(localStorage.getItem('progressData')||'[]'); } catch(e) {}
+        if (!progress.length) suggestionContent.innerHTML = '<p class="gentle">No workout data yet. Try logging a session to get personalized ideas!</p>';
+        else {
+            // Find under-trained muscle groups/exercises
+            let counts = {};
+            progress.forEach(p => { if (p.exercise) counts[p.exercise] = (counts[p.exercise]||0)+1; });
+            let least = Object.entries(counts).sort((a,b)=>a[1]-b[1]);
+            let msg = '';
+            if (least.length > 1) {
+                msg = `<b>Gentle nudge:</b> <span style='color:#4f8cff;'>Try a little more <b>${least[0][0]}</b></span> (only ${least[0][1]} set${least[0][1]===1?'':'s'}). Variety helps!`;
+            } else {
+                msg = '<span class="affirm">Keep up the balanced training! You’re doing great.</span>';
+            }
+            suggestionContent.innerHTML = `<p>${msg}</p><p class='gentle'>Suggestions are gentle and based on your logged sets.</p>`;
+        }
+    }
+    // Save progress to localStorage for JS analysis
+    try { localStorage.setItem('progressData', JSON.stringify(<?php echo json_encode($progress, JSON_PRETTY_PRINT); ?>)); } catch(e) {}
 document.addEventListener('DOMContentLoaded', () => {
     const strengthTargets = document.getElementById('strengthTargets');
     const addStrengthRow = document.getElementById('addStrengthRow');
