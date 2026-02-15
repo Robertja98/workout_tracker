@@ -58,6 +58,20 @@ $routines = is_array($routines) ? $routines : [];
     </header>
 
     <main class="page">
+        <!-- End-of-Session Popup -->
+        <div id="sessionEndPopup" class="popup" style="display:none;position:fixed;z-index:1000;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;">
+            <div style="background:#fff;padding:2em 2.5em;border-radius:1em;max-width:95vw;width:400px;text-align:center;box-shadow:0 8px 32px #0002;position:relative;">
+                <button id="closeSessionEndPopup" style="position:absolute;top:0.5em;right:0.5em;background:none;border:none;font-size:1.5em;cursor:pointer;">&times;</button>
+                <h2 id="popupEncouragement">Awesome!</h2>
+                <div id="popupSummary" style="margin:1em 0;"></div>
+                <div id="popupComparison" style="color:#555;font-size:1em;"></div>
+                <div id="popupQuote" style="margin-top:1.5em;font-style:italic;color:#888;"></div>
+                <div style="margin-top:1.5em;">
+                    <a href="dashboard.php" class="btn btn-blue">See Dashboard</a>
+                    <a href="goals.php" class="btn btn-green">Check Goals</a>
+                </div>
+            </div>
+        </div>
         <section class="hero">
             <div>
                 <p class="eyebrow">Focus mode</p>
@@ -742,6 +756,40 @@ $routines = is_array($routines) ? $routines : [];
             scheduleStateSave();
         });
 
+        // Fun encouragements and quotes
+        const encouragements = [
+            "Crushed it!",
+            "Beast mode: ON!",
+            "You’re a legend!",
+            "Workout wizardry!",
+            "That was epic!",
+            "You just leveled up!",
+            "Flex appeal!",
+            "You made those sets look easy!"
+        ];
+        const funQuotes = [
+            "Sweat is just your fat crying.",
+            "The only bad workout is the one you didn’t do.",
+            "You don’t have to be extreme, just consistent.",
+            "Strong today, stronger tomorrow.",
+            "Champions train, losers complain.",
+            "You’re one workout closer to your goal!"
+        ];
+
+        function showSessionEndPopup(summary, comparison) {
+            document.getElementById('popupEncouragement').textContent = encouragements[Math.floor(Math.random()*encouragements.length)];
+            document.getElementById('popupSummary').innerHTML = summary;
+            document.getElementById('popupComparison').textContent = comparison;
+            document.getElementById('popupQuote').textContent = funQuotes[Math.floor(Math.random()*funQuotes.length)];
+            document.getElementById('sessionEndPopup').style.display = 'flex';
+        }
+        document.getElementById('closeSessionEndPopup').onclick = function() {
+            document.getElementById('sessionEndPopup').style.display = 'none';
+        };
+
+        // Flag to suppress alert when using encouragement popup
+        let suppressSessionSavedAlert = false;
+
         endSessionBtn.addEventListener('click', () => {
             if (!sessionStart) {
                 alert('No active session to end.');
@@ -763,7 +811,40 @@ $routines = is_array($routines) ? $routines : [];
                 resetSessionState();
                 return;
             }
-            handleSaveSession(true);
+            // Build fun summary
+            let sets = totalSets;
+            let volume = totalVolume;
+            let duration = Math.floor((sessionEnd-sessionStart)/1000);
+            let min = Math.floor(duration/60), sec = duration%60;
+            let summary = `<b>${sets}</b> sets, <b>${volume}</b> total volume<br>in <b>${min}m ${sec}s</b>`;
+
+            // Compare to last session (if available)
+            let comparison = '';
+            try {
+                let prev = JSON.parse(localStorage.getItem('lastSessionStats')||'null');
+                if (prev && prev.sets !== undefined) {
+                    let diffSets = sets - prev.sets;
+                    let diffVol = volume - prev.volume;
+                    let diffTime = duration - prev.duration;
+                    let msg = [];
+                    if (diffSets > 0) msg.push(`+${diffSets} sets!`);
+                    else if (diffSets < 0) msg.push(`${-diffSets} fewer sets`);
+                    if (diffVol > 0) msg.push(`+${diffVol} volume!`);
+                    else if (diffVol < 0) msg.push(`${-diffVol} less volume`);
+                    if (diffTime < 0) msg.push(`faster by ${Math.abs(diffTime)}s`);
+                    else if (diffTime > 0) msg.push(`took ${diffTime}s longer`);
+                    if (msg.length) comparison = `Compared to last: ${msg.join(', ')}`;
+                    else comparison = "Matched your last session!";
+                }
+                localStorage.setItem('lastSessionStats', JSON.stringify({sets, volume, duration}));
+            } catch(e) { /* ignore */ }
+
+            // Save session, then show popup after save
+            suppressSessionSavedAlert = true;
+            handleSaveSession(true).then(() => {
+                showSessionEndPopup(summary, comparison);
+                suppressSessionSavedAlert = false;
+            });
         });
 
         async function handleSaveSession(resetAfterSave) {
@@ -806,7 +887,7 @@ $routines = is_array($routines) ? $routines : [];
             }
 
             if (result && result.success) {
-                alert('Session saved.');
+                if (!suppressSessionSavedAlert) alert('Session saved.');
                 if (sessionId) {
                     const drafts = loadDrafts().filter(draft => draft.id !== sessionId);
                     saveDrafts(drafts);
