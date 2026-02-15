@@ -451,16 +451,39 @@ $today = date('Y-m-d');
             <div style="font-size:0.98em;color:#6b7a8a;margin-bottom:0.5em;">Tip: Connecting your goals to your values makes them more powerful. Select what resonates today!</div>
             <script>
             // Motivational words to float
-            const motivationWords = [
+            const baseWords = [
                 'Strength', 'Energy', 'Confidence', 'Focus', 'Stress Relief', 'Discipline', 'Joy', 'Growth', 'Resilience', 'Health',
                 'Endurance', 'Balance', 'Achievement', 'Routine', 'Wellbeing', 'Empowerment', 'Challenge', 'Calm', 'Community', 'Fun',
                 'Self-care', 'Progress', 'Determination', 'Inspiration', 'Routine', 'Recovery', 'Mindfulness', 'Pride', 'Purpose', 'Vitality'
             ];
+            // Color palette for variety
+            const colorPalette = [
+                '#4bbf73', '#2e8b57', '#ffb700', '#4f8cff', '#ff6f61', '#6b7a8a', '#e6f7ee', '#ffd166', '#b388ff', '#ffb4a2', '#a3c9a8', '#f7b801'
+            ];
+            // Font sizes (in px)
+            const fontSizes = [18, 20, 22, 24, 26, 28, 32, 36];
+            // Shuffle array util
+            function shuffle(arr) {
+                for (let i = arr.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                }
+                return arr;
+            }
+            // Generate a random cloud (allow repeats, random order, size, color)
+            function getRandomCloudWords(count = 18) {
+                let words = [];
+                for (let i = 0; i < count; i++) {
+                    words.push(baseWords[Math.floor(Math.random() * baseWords.length)]);
+                }
+                return shuffle(words);
+            }
             const cloud = document.getElementById('motivationCloud');
             const selected = new Set();
+            let currentCloudWords = getRandomCloudWords();
             function renderCloud() {
                 cloud.innerHTML = '';
-                motivationWords.forEach(word => {
+                currentCloudWords.forEach(word => {
                     const span = document.createElement('span');
                     span.textContent = word;
                     span.className = 'motivation-word' + (selected.has(word) ? ' selected' : '');
@@ -468,10 +491,14 @@ $today = date('Y-m-d');
                     span.style.display = 'inline-block';
                     span.style.padding = '0.3em 0.7em';
                     span.style.borderRadius = '16px';
-                    span.style.background = selected.has(word) ? '#4bbf73' : '#e6f7ee';
-                    span.style.color = selected.has(word) ? '#fff' : '#2e8b57';
-                    span.style.cursor = 'pointer';
+                    // Random color and size
+                    const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+                    const fontSize = fontSizes[Math.floor(Math.random() * fontSizes.length)];
+                    span.style.background = selected.has(word) ? '#4bbf73' : color;
+                    span.style.color = selected.has(word) ? '#fff' : '#222';
                     span.style.fontWeight = selected.has(word) ? 'bold' : 'normal';
+                    span.style.fontSize = fontSize + 'px';
+                    span.style.cursor = 'pointer';
                     span.onclick = () => {
                         if (selected.has(word)) selected.delete(word); else selected.add(word);
                         renderCloud();
