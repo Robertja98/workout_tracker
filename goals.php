@@ -440,14 +440,56 @@ $today = date('Y-m-d');
     <main class="page">
         <section class="panel" id="goalPsychPanel">
             <h2 style="color:#4bbf73;">Identify Your Why</h2>
-            <form id="whyForm" style="margin-bottom:1em;">
-                <label for="whyInput" style="font-size:1.1em;color:#2e8b57;"><b>What motivates you to work out?</b></label><br>
-                <input id="whyInput" name="why" type="text" style="width:90%;margin:0.5em 0;border:2px solid #4bbf73;background:#e6f7ee;" maxlength="120" placeholder="E.g. Feel stronger, reduce stress, be a role model...">
-                <button class="btn btn-blue" type="submit">Save Motivation</button>
-                <span id="whySavedMsg" style="color:#4bbf73;display:none;margin-left:1em;">Saved!</span>
+            <div id="motivationCloud" style="margin-bottom:1em; min-height: 60px;"></div>
+            <form id="motivationForm" method="post" style="margin-bottom:1em;">
+                <input type="hidden" name="action" value="save_motivation">
+                <input type="hidden" id="selectedWordsInput" name="selected_words" value="">
+                <button class="btn btn-blue" type="submit">Save Today's Motivation</button>
+                <span id="motivationSavedMsg" style="color:#4bbf73;display:none;margin-left:1em;">Saved!</span>
             </form>
-            <div id="whyDisplay" style="margin-bottom:1em;"></div>
-                    <div style="font-size:0.98em;color:#6b7a8a;margin-bottom:0.5em;">Tip: Connecting your goals to your values makes them more powerful.</div>
+            <div id="motivationReflection" style="margin-bottom:1em;"></div>
+            <div style="font-size:0.98em;color:#6b7a8a;margin-bottom:0.5em;">Tip: Connecting your goals to your values makes them more powerful. Select what resonates today!</div>
+            <script>
+            // Motivational words to float
+            const motivationWords = [
+                'Strength', 'Energy', 'Confidence', 'Focus', 'Stress Relief', 'Discipline', 'Joy', 'Growth', 'Resilience', 'Health',
+                'Endurance', 'Balance', 'Achievement', 'Routine', 'Wellbeing', 'Empowerment', 'Challenge', 'Calm', 'Community', 'Fun',
+                'Self-care', 'Progress', 'Determination', 'Inspiration', 'Routine', 'Recovery', 'Mindfulness', 'Pride', 'Purpose', 'Vitality'
+            ];
+            const cloud = document.getElementById('motivationCloud');
+            const selected = new Set();
+            function renderCloud() {
+                cloud.innerHTML = '';
+                motivationWords.forEach(word => {
+                    const span = document.createElement('span');
+                    span.textContent = word;
+                    span.className = 'motivation-word' + (selected.has(word) ? ' selected' : '');
+                    span.style.margin = '0.3em';
+                    span.style.display = 'inline-block';
+                    span.style.padding = '0.3em 0.7em';
+                    span.style.borderRadius = '16px';
+                    span.style.background = selected.has(word) ? '#4bbf73' : '#e6f7ee';
+                    span.style.color = selected.has(word) ? '#fff' : '#2e8b57';
+                    span.style.cursor = 'pointer';
+                    span.style.fontWeight = selected.has(word) ? 'bold' : 'normal';
+                    span.onclick = () => {
+                        if (selected.has(word)) selected.delete(word); else selected.add(word);
+                        renderCloud();
+                        document.getElementById('selectedWordsInput').value = Array.from(selected).join(',');
+                    };
+                    cloud.appendChild(span);
+                });
+            }
+            renderCloud();
+            document.getElementById('motivationForm').onsubmit = function(e) {
+                if (selected.size === 0) {
+                    alert('Please select at least one word that motivates you today.');
+                    e.preventDefault();
+                    return false;
+                }
+                document.getElementById('selectedWordsInput').value = Array.from(selected).join(',');
+            };
+            </script>
         </section>
         <section class="panel" id="suggestionPanel">
             <h2 style="display:inline;color:#4f8cff;">Need a Nudge?</h2>

@@ -1,3 +1,10 @@
+// Serve motivation reflection as JSON for AJAX
+if (isset($_GET['action']) && $_GET['action'] === 'get_motivation_reflection') {
+    header('Content-Type: application/json');
+    $reflection = user_load_data('motivation_reflection.json', []);
+    echo json_encode($reflection);
+    exit;
+}
 <?php
 function user_load_json($file, $default = []) {
     if (!file_exists($file)) {
